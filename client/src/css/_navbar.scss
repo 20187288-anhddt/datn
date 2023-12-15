@@ -1,0 +1,19 @@
+.account {
+  @include disFlex(row wrap, center, center);
+
+  &__avatar {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  & img {
+    width: 100%;
+    object-fit: cover;
+  }
+}
+
+.dropdown-menu{
+  margin-top: 0 !important;
+}

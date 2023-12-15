@@ -1,0 +1,103 @@
+@media only screen and (max-width: "1200px") {
+	.featured-new__image {
+	    height: 4rem;
+	}
+
+	.latest-new__image {
+	  flex: 60.4% 1;
+    height: 3.5rem;
+	}
+
+		.other-new__image {
+	    flex: 25% 1;
+	    height: 6rem;
+		}
+}
+
+@media only screen and (max-width: "992px") {
+	.channel__image {
+    display: none;
+	}
+
+	.featured-new__image {
+	  flex: 37% 1;
+    height: 4.7rem;
+	}
+
+	.latest-new__image {
+    flex: 35% 1;
+    height: 3rem;
+	}
+
+	.selected-news {
+	  height: 8rem;
+	}
+
+	h3{
+		margin-top: 1rem !important;
+	}
+
+	.navbar-collapse{
+		flex-flow: column !important;
+		text-align: left !important;
+	}
+}
+
+@media only screen and (max-width: "768px") {
+	.latest-new__image {
+	    flex: 30% 1;
+	    height: 5.1rem;
+	}
+
+	.featured-new__image {
+	    flex: 30% 1;
+	    height: 5.1rem;
+	}
+
+	.main-featured-new > h3{
+		margin-top: 1rem !important;
+	}
+
+	.other-new__image {
+    flex: 30% 1;
+    height: 5.1rem;
+	}
+
+	h3{
+		margin-top: 1rem !important;
+	}
+
+	.selected-news {
+	    height: 5.1rem;
+	}
+
+	.fanpage{
+		display: none;
+	}
+}
+
+@media only screen and (max-width: "576px") {
+	.selected-news {
+    height: 15rem;
+	}
+
+	.other-new__image {
+    flex: 26% 1;
+    height: 4.1rem;
+	}
+
+	.other-new:first-of-type .other-new__image {
+    max-height: 12rem;
+    overflow: hidden;
+	}
+
+	.featured-new__image {
+		flex: 26% 1;
+    height: 4.1rem;
+	}
+
+	.latest-new__image {
+    flex: 26% 1;
+    height: 4.1rem;
+	}
+}
