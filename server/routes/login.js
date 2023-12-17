@@ -4,6 +4,7 @@ const fileUpload = require("express-fileupload");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const validInput = require("../utils/validInput");
+const authenticateToken = require("../utils/authenticateToken");
 const { responseCode, callRes } = require("../response/error");
 const UserModel = require("../models/User");
 const path = require("path");
@@ -13,27 +14,27 @@ const nodemailer = require("nodemailer");
 const key = {
   tokenKey: "djghhhhuuwiwuewieuwieuriwu_cus",
 };
-function authenticateToken(req, res, next) {
-  const token = req.header("auth-token");
+// function authenticateToken(req, res, next) {
+//   const token = req.header("auth-token");
 
-  if (!token) {
-    return res.status(401).json({
-      code: 401,
-      message: "Access denied. Token is missing.",
-    });
-  }
+//   if (!token) {
+//     return res.status(401).json({
+//       code: 401,
+//       message: "Access denied. Token is missing.",
+//     });
+//   }
 
-  try {
-    const decoded = jwt.verify(token, key.tokenKey);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(403).json({
-      code: 403,
-      message: "Invalid token.",
-    });
-  }
-}
+//   try {
+//     const decoded = jwt.verify(token, key.tokenKey);
+//     req.user = decoded;
+//     next();
+//   } catch (error) {
+//     return res.status(403).json({
+//       code: 403,
+//       message: "Invalid token.",
+//     });
+//   }
+// }
 
 const app = express();
 app.use(fileUpload());
