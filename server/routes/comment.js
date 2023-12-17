@@ -1,109 +1,102 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
 // Models
 const ProhibitedWordsModel = require("../models/ProhibitedWords");
 const CommentModel = require("../models/Comment");
 
-router.get('/prohibitedWords', async (req, res) => {
-	try {
-		const prohibitedWords = await ProhibitedWordsModel.find({});
+router.get("/prohibitedWords", async (req, res) => {
+  try {
+    const prohibitedWords = await ProhibitedWordsModel.find({});
 
-		if (prohibitedWords) {
-			return res.json({
-				code: 200,
-				data: prohibitedWords
-			});
-		}
-	}
-	catch (e) {
-		return res.json({
-			code: 400,
-			message: e
-		});
-	}
+    if (prohibitedWords) {
+      return res.json({
+        code: 200,
+        data: prohibitedWords,
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching prohibited words:", error);
+    return res.status(500).json({
+      code: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
 });
 
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
+  try {
+    const newsId = req.params.id;
+    const commentsOfNews = await CommentModel.find({ news: newsId })
+      .limit(5)
+      .sort({ date: -1 })
+      .populate("createdBy");
 
-	try {
-		const NewsId = req.params.id;
-		const CommentsOfNews = await CommentModel.find({ news: NewsId }).limit(5).sort({ date: -1 }).populate("createdBy");
+    if (commentsOfNews.length === 0) {
+      return res.json({
+        code: 404,
+        message: "Không có bình luận nào cho tin tức này.",
+      });
+    }
 
-		return res.json({
-			code: 200,
-			data: CommentsOfNews
-		});
-	}
-	catch (e) {
-		return res.json({
-			code: 400,
-			message: e
-		});
-	}
+    return res.json({
+      code: 200,
+      data: commentsOfNews,
+    });
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    return res.status(500).json({
+      code: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
 });
 
+router.post("/", async (req, res) => {
+  try {
+    const body = req.body;
 
-// comment
-router.post('/', async (req, res) => {
-	try {
-		const body = req.body;
+    // Check từ ngữ cấm
+    const prohibitedWords = await ProhibitedWordsModel.find({});
+    const words = prohibitedWords[0]?.words || [];
+    const content = body.content;
 
-		// check từ ngữ cấm
-		const prohibitedWords = await ProhibitedWordsModel.find({});
-		const words = prohibitedWords[0]?.words || [""];
-		const content = body.content;
+    if (words.length > 0 && content) {
+      const regex = new RegExp(words.join("|"), "gi");
+      const result = content.replace(regex, (match) =>
+        "*".repeat(match.length)
+      );
 
-		if (words && content) {
-			const getWord = content.split(" ");
+      const comment = new CommentModel({
+        news: body.newsId,
+        createdBy: body.userId,
+        content: result,
+      });
 
-			let result = "";
+      const saveComment = await comment.save();
+      const commentsOfNews = await CommentModel.find({ news: body.newsId })
+        .limit(5)
+        .sort({ date: -1 })
+        .populate("createdBy");
 
-			function checkLength (number) {
-			  switch (number) {
-			    case 2:
-			      return "**";
-			    case 3:
-			      return "***";
-			    case 4:
-			      return "****";
-			    default:
-			      return "*****";
-			  }
-			};
-
-			getWord.forEach(v => {
-			  if (words.includes(v)) {
-			    result = content.replace(v, checkLength(v.length));
-			  } else {
-			  	result = content;
-			  }
-			});
-
-			const comment = new CommentModel({
-				news: body.newsId,
-				createdBy: body.userId,
-				content: result
-			});
-
-			const saveComment = await comment.save();
-			const CommentsOfNews = await CommentModel.find({ news: body.newsId }).limit(5).sort({ date: -1 }).populate("createdBy");
-
-			return res.json({
-				code: 200,
-				data: CommentsOfNews
-			});
-		}
-	}
-	catch (e) {
-		return res.json({
-			code: 400,
-			message: e
-		});
-	}
+      return res.json({
+        code: 200,
+        data: commentsOfNews,
+      });
+    }
+  } catch (error) {
+    console.error("Error posting comment:", error);
+    return res.status(500).json({
+      code: 500,
+      message: "Lỗi nội bộ",
+      error: error.message,
+    });
+  }
 });
 
-router.delete("/", async function(req, res, next) {
+router.delete("/", async function (req, res, next) {
   try {
     const _id = req.query.commentId;
     const newsId = req.query.newsId;
@@ -112,13 +105,16 @@ router.delete("/", async function(req, res, next) {
 
     if (commentExist) {
       const commentDelete = await CommentModel.findOneAndDelete({ _id: _id });
-      const CommentsOfNews = await CommentModel.find({ news: newsId }).limit(5).sort({ date: -1 }).populate("createdBy");
+      const CommentsOfNews = await CommentModel.find({ news: newsId })
+        .limit(5)
+        .sort({ date: -1 })
+        .populate("createdBy");
 
       if (commentDelete) {
         res.json({
           code: 200,
           message: "Xóa thành công",
-          data: CommentsOfNews
+          data: CommentsOfNews,
         });
       }
     }
@@ -126,32 +122,46 @@ router.delete("/", async function(req, res, next) {
     return res.json({
       code: 400,
       message: "Xóa thất bại",
-      err: err
+      err: err,
     });
   }
 });
 
-// them tu comment cấm
 router.put("/prohibitedWords", async (req, res) => {
-	try {
-		const body = req.body;
+  try {
+    const body = req.body;
+    const wordToAdd = body.word.trim().toLowerCase(); // Chuyển đổi về chữ thường và loại bỏ khoảng trắng đầu cuối.
 
-		const words = await ProhibitedWordsModel.find({});
-		const pushWords = [ ...words[0].words, body.word ];
+    const existingWords = await ProhibitedWordsModel.findOne({});
+    const currentWords = existingWords ? existingWords.words : [];
 
-		await ProhibitedWordsModel.findOneAndUpdate({ _id: "5de60e175ec272280876975e" }, { words: pushWords });
+    // Kiểm tra xem từ đã tồn tại hay chưa
+    if (currentWords.includes(wordToAdd)) {
+      return res.status(400).json({
+        code: 400,
+        message: "Từ đã tồn tại trong danh sách từ cấm.",
+      });
+    }
 
-		return res.json({
-			code: 200,
-      message: "Thêm thành công"
-		});
-	} catch (e) {
-		return res.json({
-      code: 400,
-      message: "Thêm thất bại",
-      err: err
+    // Thêm từ mới vào danh sách và cập nhật trong database
+    const updatedWords = [...currentWords, wordToAdd];
+    await ProhibitedWordsModel.findOneAndUpdate(
+      { _id: "620facc2a52b136a9ddd5f8f" },
+      { words: updatedWords }
+    );
+
+    return res.json({
+      code: 200,
+      message: "Thêm từ cấm thành công",
     });
-	}
+  } catch (error) {
+    console.error("Error adding prohibited word:", error);
+    return res.status(500).json({
+      code: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
 });
 
 module.exports = router;
