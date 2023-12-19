@@ -9,15 +9,16 @@ export default function NewsHighlight(props) {
 
   React.useEffect(() => {
     setHighlightNew(props.highlightNew);
-    
   }, [props.highlightNew]);
 
   return (
     <div>
-      <h3 className="mb-3">Tin tức nổi bật</h3>
+      <h3 className="mb-3">Tin tức nổi bật 24h qua</h3>
       {highlightNew ? (
         <Link
-          to={`/${highlightNew.title && hanldeUrlPretty(highlightNew.title)}/${highlightNew._id}`}
+          to={`/${highlightNew.title && hanldeUrlPretty(highlightNew.title)}/${
+            highlightNew._id
+          }`}
           className="featured-new p-3 bg-white rounded text-decoration-none"
         >
           {highlightNew.articlePicture ? (
@@ -27,7 +28,9 @@ export default function NewsHighlight(props) {
                 alt={highlightNew.title}
               />
             </div>
-          ) : (<BoxLoadingItem />)}
+          ) : (
+            <BoxLoadingItem />
+          )}
           <div className="featured-new__info">
             <h4 className="featured-new__title">{highlightNew.title}</h4>
           </div>

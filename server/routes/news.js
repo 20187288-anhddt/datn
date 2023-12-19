@@ -9,6 +9,10 @@ const router = express.Router();
 const auth = require("../middleware/auth");
 const authJour = require("../middleware/checkJournalist");
 const authEditor = require("../middleware/checkEditor");
+const cheerio = require("cheerio");
+const request = require("request-promise");
+const axios = require("axios");
+const moment = require("moment");
 /* GET users listing. */
 
 const app = express();
@@ -145,7 +149,7 @@ router.get("/q", async function (req, res, next) {
 router.get("/latestNews", async function (req, res, next) {
   try {
     const News = await NewsModel.find({ status: "published" })
-      .limit(7)
+      .limit(10)
       .sort({ dateCreate: -1 })
       .populate("createdBy");
 
@@ -162,21 +166,80 @@ router.get("/latestNews", async function (req, res, next) {
     });
   }
 });
-
-// news other
-router.get("/other", async function (req, res, next) {
+// news ( status = "published" )
+router.get("/featuredNews", async function (req, res, next) {
   try {
-    const number = +req.query.number;
-    console.log(typeof number);
-    const News = await NewsModel.find({ status: "published" })
-      .limit(number)
-      .sort({ view: -1 })
+    // Lấy thời điểm hiện tại
+    const now = new Date();
+
+    // Tính thời điểm 24 giờ trước đó
+    const twentyFourHoursAgo = new Date(now);
+    twentyFourHoursAgo.setHours(now.getHours() - 72);
+
+    // Truy vấn để lấy các bài viết nổi bật trong vòng 24 giờ
+    const featuredNews = await NewsModel.find({
+      status: "published",
+      isDelete: false,
+      dateCreate: { $gte: twentyFourHoursAgo, $lte: now },
+    })
+      .limit(5)
+      .sort({ view: -1, dateCreate: -1 })
       .populate("createdBy");
 
     return res.json({
       code: 200,
       err: null,
-      data: News,
+      data: featuredNews,
+    });
+  } catch (err) {
+    return res.json({
+      code: 400,
+      err: err.message,
+      data: null,
+    });
+  }
+});
+
+// news other
+router.get("/other", async function (req, res, next) {
+  try {
+    const number = +req.query.number;
+    const threeDaysAgo = moment().subtract(7, "days").toDate();
+    // console.log(threeDaysAgo);
+    // const News = await NewsModel.aggregate([
+    //   { $match: { status: "published", dateCreate: { $gte: threeDaysAgo } } }, // Lọc các bản ghi có trạng thái "published" và dateCreate trong vòng 3 ngày
+    //   { $sample: { size: number } }, // Lấy ngẫu nhiên 10 bản ghi
+    // ]);
+
+    const News = await NewsModel.aggregate([
+      { $match: { status: "published", dateCreate: { $gte: threeDaysAgo } } }, // Lọc các bản ghi có trạng thái "published" và dateCreate trong vòng 3 ngày
+      { $sample: { size: 3 } }, // Lấy ngẫu nhiên 10 bản ghi
+    ]);
+
+    // Lọc các bản ghi trùng lặp
+    const filterDuplicateNews = (newNews, prevNews) => {
+      const prevNewsIds = prevNews.map((news) => news._id.toString());
+      return newNews.filter(
+        (news) => !prevNewsIds.includes(news._id.toString())
+      );
+    };
+
+    const newNews = await NewsModel.aggregate([
+      { $match: { status: "published", dateCreate: { $gte: threeDaysAgo } } },
+      { $sample: { size: number } },
+    ]);
+    const filteredNews = filterDuplicateNews(newNews, News);
+    const combinedNews = [...News, ...filteredNews];
+
+    // const News = await NewsModel.find({ status: "published" })
+    //   .limit(number)
+    //   .sort({ view: -1 })
+    //   .populate("createdBy");
+
+    return res.json({
+      code: 200,
+      err: null,
+      data: combinedNews,
     });
   } catch (err) {
     return res.json({
@@ -435,22 +498,72 @@ router.get("/details/:_idNews", async function (req, res, next) {
       _id: idNews,
       isDelete: false,
     }).populate("createdBy");
-
-    if (News.length > 0 && News[0].status === "unpublished")
+    console.log(News[0].originalLink);
+    if (News.length === 0) {
       return res.json({
         code: 200,
         err: null,
         data: [null],
       });
+    }
+    const newsItem = News[0];
+
+    // Kiểm tra xem content có giá trị rỗng hay không
+    if (
+      newsItem.content.trim() === "" &&
+      newsItem.source.trim() === "znews.vn"
+    ) {
+      // Nếu rỗng, thực hiện lấy toàn bộ mã HTML từ URL
+      try {
+        const response = await axios.get(newsItem.originalLink);
+        const html = response.data;
+
+        // Sử dụng cheerio để load mã HTML
+        const $ = cheerio.load(html);
+
+        // Trích xuất nội dung từ phần tử mong muốn (thay bằng phần tử thực tế bạn muốn trích xuất)
+        const extractedContent = $(".the-article-body").html();
+        console.log(extractedContent);
+        // Lưu nội dung vào newsItem.content
+        newsItem.content = extractedContent;
+        await newsItem.save();
+
+        const newsClass = await NewsModel.findOneAndUpdate(
+          { _id: idNews },
+          {
+            $set: {
+              title: News.title,
+              content: extractedContent,
+              tag: News.tags,
+              cateNews: News.cateNews,
+              createdBy: News.createdBy,
+              articlePicture: News.articlePicture,
+              originalLink: News.originalLink,
+              dateCreate: News.dateCreate,
+              sapo: News.sapo,
+              source: News.source,
+              status: News.status,
+            },
+          }
+        );
+      } catch (error) {
+        console.error("Error fetching HTML:", error);
+      }
+    }
+    const NewsUpdate = await NewsModel.find({
+      _id: idNews,
+      isDelete: false,
+    }).populate("createdBy");
+    // Trả về dữ liệu
     return res.json({
       code: 200,
       err: null,
-      data: News,
+      data: NewsUpdate,
     });
   } catch (err) {
     return res.json({
       code: 400,
-      err: err.messege,
+      err: err.message,
       data: null,
     });
   }

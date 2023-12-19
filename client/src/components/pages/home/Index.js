@@ -1,5 +1,5 @@
 import React from "react";
-import {Helmet} from 'react-helmet'
+import { Helmet } from "react-helmet";
 
 import LatestNew from "./LatestNew";
 import FeaturedNew from "./FeaturedNew";
@@ -7,13 +7,18 @@ import FeaturedChannel from "./FeaturedChannel";
 import NewsOther from "./NewsOther";
 import AdditionalNew from "./AdditionalNew";
 
-
 export default function Home() {
   return (
     <>
       <Helmet>
-        <title>BNews kênh tin tức thời dự, bóng đá, tin trong ngày, giải trí, bất động sản,...</title>
-        <meta name="description" content="BNews kênh tin tức hàng đầu Việt Nam, thời dự, bóng đá, tin trong ngày, giải trí, bất động sản,..." />
+        <title>
+          BNews kênh tin tức thời dự, bóng đá, tin trong ngày, giải trí, bất
+          động sản,...
+        </title>
+        <meta
+          name="description"
+          content="BNews kênh tin tức hàng đầu Việt Nam, thời dự, bóng đá, tin trong ngày, giải trí, bất động sản,..."
+        />
       </Helmet>
       <div className="container">
         <div className="row">
@@ -21,7 +26,9 @@ export default function Home() {
             <LatestNew />
           </div>
           <div className="col-lg-6 col-md-7 main-featured-new">
-            <h3 className="mb-3 text-red font-weight">Tin tức nổi bật</h3>
+            <h3 className="mb-3 text-red font-weight">
+              Tin tức nổi bật trong 24h qua
+            </h3>
             <FeaturedNew />
           </div>
           <div className="col-lg-3 col-md-12">

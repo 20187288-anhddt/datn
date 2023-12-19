@@ -8,7 +8,7 @@ import { hanldeUrlPretty } from "../mixin/UrlPretty";
 export default function Search() {
   // const [loading, setLoading] = React.useState(false);
   const textSearch = React.useRef("");
-  const appState = useSelector(state => state);
+  const appState = useSelector((state) => state);
   const dispatch = useDispatch();
 
   const hanldeChangeSearch = () => {
@@ -29,7 +29,7 @@ export default function Search() {
         id="searchId"
         className="form-control mr-sm-2 search__input"
         type="search"
-        placeholder="Tìm kiếm..."
+        placeholder="Nhập nội dung cần tìm kiếm..."
         ref={textSearch}
         onChange={hanldeChangeSearch}
       />
@@ -44,7 +44,11 @@ export default function Search() {
               >
                 <div className="search-new__image">
                   <img
-                    src={item.content === "" ? item.articlePicture: `/uploads/news/${item.articlePicture}`}
+                    src={
+                      item.originalLink !== ""
+                        ? item.articlePicture
+                        : `/uploads/news/${item.articlePicture}`
+                    }
                     alt={item.title}
                   />
                 </div>
