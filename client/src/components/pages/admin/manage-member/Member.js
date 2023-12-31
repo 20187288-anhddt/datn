@@ -130,8 +130,10 @@ export default function Member() {
                   }
                   value={props.original.role}
                 >
-                  <option value="admin">admin</option>
-                  <option value="customer">customer</option>
+                  <option value="admin">Admin</option>
+                  <option value="customer">Customer</option>
+                  <option value="customer">Journalist</option>
+                  <option value="customer">Editor</option>
                 </select>
               </span>
               {props.original.isDelete ? (

@@ -39,7 +39,7 @@ export default function Infomation() {
         className="avatar img-circle img-thumbnail"
         alt="avatar"
       />
-      <h6>Change Avatar...</h6>
+      <h6>Change Avatar... </h6>
       <div className="custom-file mb-3">
         <input
           type="file"

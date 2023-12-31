@@ -28,8 +28,14 @@ router.get("/prohibitedWords", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const newsId = req.params.id;
+    let { page = 1, limit = 5 } = req.query;
+
+    // Calculate the number of comments to skip based on the page and limit
+    const skip = (page - 1) * limit;
+
     const commentsOfNews = await CommentModel.find({ news: newsId })
-      .limit(5)
+      .skip(skip)
+      .limit(parseInt(limit))
       .sort({ date: -1 })
       .populate("createdBy");
 
@@ -53,6 +59,7 @@ router.get("/:id", async (req, res) => {
     });
   }
 });
+
 
 router.post("/", async (req, res) => {
   try {
@@ -90,7 +97,7 @@ router.post("/", async (req, res) => {
     console.error("Error posting comment:", error);
     return res.status(500).json({
       code: 500,
-      message: "Lỗi nội bộ",
+      message: "Internal error server",
       error: error.message,
     });
   }

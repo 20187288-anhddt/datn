@@ -25,96 +25,129 @@ function getEndDay(){
   );
 }
 
-
-// ADD tin tuc trong ngay de thong ke thoi diem nguoi dung xem tin
+// Endpoint để thêm lượt xem cho tin tức trong ngày
 router.post("/news", async (req, res) => {
   try {
     const { id, createdBy } = req.body;
-    if (id) {
-      const newsViews = new ViewModel({
-        news: id,
-        createdBy: createdBy
+
+    if (!id || !createdBy) {
+      // Nếu thiếu thông tin cần thiết, trả về lỗi
+      return res.status(400).json({
+        code: 400,
+        err: "Thiếu thông tin cần thiết.",
       });
-
-      const saveNewsViews = await newsViews.save();
-
-      if (saveNewsViews) {
-        return res.json({
-          code: 200,
-          err: null,
-          data: newsViews
-        });
-      }
     }
 
+    // Kiểm tra xem tin tức đã được xem trong ngày chưa
+    const existingView = await ViewModel.findOne({
+      news: id,
+      createdBy: createdBy,
+      createdAt: { $gte: getToday(), $lt: getEndDay() },
+    });
+
+    if (existingView) {
+      // Nếu đã xem rồi, trả về thông báo
+      return res.status(200).json({
+        code: 200,
+        message: "Tin tức đã được xem trong ngày.",
+        data: existingView,
+      });
+    }
+
+    // Nếu chưa xem, tạo một bản ghi mới
+    const newsViews = new ViewModel({
+      news: id,
+      createdBy: createdBy,
+    });
+
+    // Lưu bản ghi mới
+    const saveNewsViews = await newsViews.save();
+
+    if (saveNewsViews) {
+      return res.status(200).json({
+        code: 200,
+        message: "Thêm lượt xem cho tin tức thành công.",
+        data: newsViews,
+      });
+    }
   } catch (error) {
-    return res.json({
-      code: 400,
-      err: error
+    // Xử lý lỗi và trả về thông báo lỗi
+    console.error(error);
+    return res.status(500).json({
+      code: 500,
+      message: "Đã xảy ra lỗi khi thêm lượt xem cho tin tức.",
+      error: error.message || "Lỗi không xác định",
+      data: null,
     });
   }
 });
 
-// GET tin tuc trong ngay de thong ke thoi diem nguoi dung xem tin
+
+// Endpoint để lấy tin tức đã xem trong ngày để thống kê
 router.get('/viewsOfDay', async (req, res) => {
   try {
+    // Lấy tin tức đã xem trong ngày
     const news = await ViewModel.find({
       isDelete: false,
-      date: {
-        $gte: getToday(),
-        $lte: getEndDay()
-      }
+      createdAt: { $gte: getToday(), $lte: getEndDay() },
     });
 
-    res.json({
+    res.status(200).json({
       code: 200,
-      data: news
-    })
-  } catch (e) {
-    res.json({
-      code: 400,
-      message: e
-    })
+      message: "Lấy tin tức đã xem trong ngày thành công",
+      data: news,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      code: 500,
+      message: "Đã xảy ra lỗi khi lấy tin tức đã xem trong ngày",
+      error: error.message || "Lỗi không xác định",
+      data: null,
+    });
   }
 });
-
 router.get("/viewsOfMonth", async (req, res) => {
   try {
     const month = req.query.month;
-    console.log(month);
 
+    // Xác định thời điểm bắt đầu và kết thúc của tháng được chọn
     const startMonth = new Date(
       moment(month)
-      .startOf("month")
-      .format("YYYY-MM-DD")
+        .startOf("month")
+        .format("YYYY-MM-DD")
     );
 
     const endMonth = new Date(
       moment(startMonth)
-      .endOf("month")
-      .format("YYYY-MM-DD")
+        .endOf("month")
+        .format("YYYY-MM-DD")
     );
- 
+
+    // Lấy tin tức đã xem trong tháng và sắp xếp theo số lần xem giảm dần
     const viewToMonth = await ViewModel.find({
-        isDelete: false,
-        date: {
-          $gte: startMonth,
-          $lte: endMonth
-        }
-      }).sort({
-        view: -1
-      })
+      isDelete: false,
+      date: {
+        $gte: startMonth,
+        $lte: endMonth,
+      },
+    })
+      .sort({ view: -1 })
       .populate("createdBy");
 
-    return res.json({
-      data: viewToMonth
+    return res.status(200).json({
+      code: 200,
+      message: "Lấy tin tức đã xem trong tháng thành công",
+      data: viewToMonth,
     });
   } catch (err) {
-    console.log(err);
-    return res.json({
-      code: 400,
-      err: err.messege,
-      data: null
+    console.error(err);
+    return res.status(500).json({
+      code: 500,
+      message: "Đã xảy ra lỗi khi lấy tin tức đã xem trong tháng",
+      error: err.message || "Lỗi không xác định",
+      data: null,
     });
   }
 });

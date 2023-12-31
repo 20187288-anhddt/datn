@@ -97,9 +97,18 @@ router.get("/newsEntertainments", async function (req, res, next) {
 router.get("/newsReels", async function (req, res, next) {
   try {
     const newsId = req.query.newsId;
-    console.log("newsId", newsId);
+
+    if (!newsId) {
+      return res.status(400).json({
+        code: 400,
+        err: "Missing 'newsId' parameter",
+        data: null,
+      });
+    }
+
+    // Tiếp tục xử lý với newsId hợp lệ
     const News = await NewsModel.find({ status: "published", cateNews: newsId })
-      .limit(6)
+      .limit(8)
       .sort({ view: -1, dateCreate: -1 })
       .populate("createdBy");
 
@@ -109,47 +118,105 @@ router.get("/newsReels", async function (req, res, next) {
       data: News,
     });
   } catch (err) {
-    return res.json({
-      code: 400,
-      err: err.messege,
+    return res.status(500).json({
+      code: 500,
+      err: err.message,
       data: null,
     });
   }
 });
 
 // search
+// router.get("/q", async function (req, res, next) {
+//   try {
+//     const textSearch = req.query.textSearch;
+
+//     if (!textSearch || textSearch.trim() === "") {
+//       return res.status(400).json({
+//         code: 400,
+//         err: "Invalid or missing 'textSearch' parameter",
+//         data: null,
+//       });
+//     }
+
+//     const News = await NewsModel.find({
+//       title: { $regex: textSearch, $options: "i" },
+//       isDelete: false,
+//       status: "published",
+//     })
+//       .limit(30)
+//       .sort({ view: -1, dateCreate: -1 });
+//       console.log(News);
+//     if (News) {
+//       return res.json({
+//         code: 200,
+//         err: null,
+//         data: News,
+//       });
+//     }
+//   } catch (err) {
+//     return res.status(500).json({
+//       code: 500,
+//       err: err.message,
+//       data: null,
+//     });
+//   }
+// });
+const Fuse = require('fuse.js');
+
 router.get("/q", async function (req, res, next) {
   try {
     const textSearch = req.query.textSearch;
-    const News = await NewsModel.find({
-      title: { $regex: textSearch, $options: "i" },
+
+    if (!textSearch || textSearch.trim() === "") {
+      return res.status(400).json({
+        code: 400,
+        err: "Vui lòng nhập 'textSearch' parameter",
+        data: null,
+      });
+    }
+
+    const newsData = await NewsModel.find({
+      $or: [
+        { title: { $regex: textSearch, $options: "i" } },
+        { sapo: { $regex: textSearch, $options: "i" } },
+        { content: { $regex: textSearch, $options: "i" } },
+      ],
       isDelete: false,
       status: "published",
     })
       .limit(30)
       .sort({ view: -1, dateCreate: -1 });
 
-    if (News) {
-      return res.json({
-        code: 200,
-        err: null,
-        data: News,
-      });
-    }
-  } catch (err) {
+    // Chuyển đổi dữ liệu tin tức sang định dạng mà fuse.js yêu cầu
+    const fuseOptions = {
+      keys: ['title', 'content', 'sapo'], // Thêm các trường cần tìm kiếm
+    };
+    const fuse = new Fuse(newsData, fuseOptions);
+
+    // Thực hiện tìm kiếm với fuse.js
+    const searchResult = fuse.search(textSearch);
+console.log(searchResult);
     return res.json({
-      code: 400,
-      err: err.messege,
+      code: 200,
+      err: null,
+      data: searchResult,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      code: 500,
+      err: err.message,
       data: null,
     });
   }
 });
 
+
 // get latestnews
 router.get("/latestNews", async function (req, res, next) {
   try {
     const News = await NewsModel.find({ status: "published" })
-      .limit(10)
+      .limit(9)
       .sort({ dateCreate: -1 })
       .populate("createdBy");
 
@@ -579,7 +646,7 @@ router.post("/", async function (req, res, next) {
     }
     const News = new NewsModel({
       title: body.title,
-      content: body.content,
+      //content: body.content,
       sapo: body.sapo,
       content: body.content,
       cateNews: body.cateNews,

@@ -22,12 +22,12 @@ export default function Register({ history }) {
     } else {
       const formData = new FormData();
 
-      formData.append("userName", data.userName);
+      formData.append("username", data.username);
       formData.append("email", data.email);
       formData.append("password", data.password);
 
       try {
-        const res = await axios.post("/login/register", formData, {
+        const res = await axios.post("/login/signup", formData, {
           header: { "Content-Type": "multipart/form-data" }
         });
 

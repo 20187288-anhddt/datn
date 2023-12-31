@@ -55,7 +55,7 @@ export default function AddCategory() {
                 ref={register({ required: true })}
               />
               {errors.category && (
-                <small className="text-danger">This field is required</small>
+                <small className="text-danger">Bạn cần nhập tên danh mục</small>
               )}
             </div>
             <button type="submit" className="btn btn-danger bety-btn">

@@ -28,31 +28,40 @@ export default function Login({ history }) {
 	  });
 
 	  try {
-		 const res = await axios.post("/login", data);
-
-		 if (res.data.code === 200) {
-			// luu token
-			const tokenCode = res.data.token;
-			localStorage.setItem("auth-token", tokenCode);
-
-			// truyen user data vao global
-			const { _id } = res.data.data;
-			const userId = _id;
-			const { code, message } = res.data;
-
-			sessionStorage.setItem("userId", userId);
-			localStorage.setItem("userId", userId);
-
-			dispatch(addUser(res.data.data));
-			dispatch(setMessage({ code, message }));
-			dispatch(closeMessage({ code, message }));
-
-			history.push("/");
-		 }
-		 const { code, message } = res.data;
-
-		 dispatch(setMessage({ code, message }));
-		 dispatch(closeMessage({ code, message }));
+		try {
+			const res = await axios.post("/login", data);
+		  
+			if (res.data.code === 200) {
+			  // Lưu token vào localStorage
+			  const { token } = res.data;
+			  localStorage.setItem("auth-token", token);
+		  
+			  // Lưu userId vào sessionStorage và localStorage
+			  const { _id } = res.data.data;
+			  const userId = _id;
+			  sessionStorage.setItem("userId", userId);
+			  localStorage.setItem("userId", userId);
+		  
+			  // Dispatch action để lưu thông tin người dùng vào global state
+			  dispatch(addUser(res.data.data));
+		  
+			  // Hiển thị thông báo thành công và đóng thông báo
+			  dispatch(setMessage({ code: 200, message: "Đăng nhập thành công" }));
+			  dispatch(closeMessage());
+		  
+			  // Chuyển hướng đến trang chính
+			  history.push("/");
+			} else {
+			  // Hiển thị thông báo lỗi và đóng thông báo
+			  const { code, message } = res.data;
+			  dispatch(setMessage({ code, message }));
+			  dispatch(closeMessage());
+			}
+		  } catch (error) {
+			// Xử lý lỗi nếu có
+			console.error("Có lỗi khi đăng nhập:", error);
+		  }
+		  
 	  } catch (error) {
 		 if (error) console.log("Have a problem", error);
 	  }

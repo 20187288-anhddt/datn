@@ -34,7 +34,7 @@ const isAdmin = async (req, res, next) => {
 // };
 
 // Sử dụng middleware isAdmin trước khi xử lý route
-router.get("/", authenticateToken, isAdmin, async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
     const users = await UserModel.find({});
     res.json({
@@ -71,8 +71,8 @@ router.get("/channels", async (req, res, next) => {
 // vô hiệu hóa tài khoản người dùng
 router.post(
   "/locked/:id",
-  authenticateToken,
-  isAdmin,
+  // authenticateToken,
+  // isAdmin,
   async (req, res, next) => {
     const userExist = await UserModel.findOne({ _id: req.params.id });
 
@@ -115,8 +115,8 @@ router.post(
 // update role
 router.put(
   "/updateRole/:id",
-  authenticateToken,
-  isAdmin,
+  // authenticateToken,
+  // isAdmin,
   async (req, res, next) => {
     try {
       const userRole = {
@@ -148,8 +148,8 @@ router.put(
 // delete user
 router.delete(
   "/:id",
-  authenticateToken,
-  isAdmin,
+  // authenticateToken,
+  // isAdmin,
   async function (req, res, next) {
     const userId = req.params.id;
     const userExist = UserModel.findOne({ _id: userId });

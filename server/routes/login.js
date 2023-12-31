@@ -72,7 +72,7 @@ router.post("/signup", async function (req, res) {
 });
 
 router.post("/register", async function (req, res) {
-  const { password, email, username } = req.body;
+  const { password, email, username } = req.params;
 
   if (!email || !password || !username) {
     return callRes(
@@ -263,7 +263,9 @@ router.get("/:token", async (req, res) => {
 });
 
 // update name, email, password, photo
-router.put("/updateName/:id", authenticateToken, async (req, res) => {
+router.put("/updateName/:id", 
+// authenticateToken, 
+async (req, res) => {
   try {
     // Kiểm tra người dùng tồn tại
     const userExist = await UserModel.findOne({ _id: req.params.id });
@@ -301,7 +303,9 @@ router.put("/updateName/:id", authenticateToken, async (req, res) => {
   }
 });
 
-router.put("/updateEmail/:id", authenticateToken, async (req, res) => {
+router.put("/updateEmail/:id", 
+// authenticateToken, 
+async (req, res) => {
   try {
     // Kiểm tra người dùng tồn tại
     const userExist = await UserModel.findOne({ _id: req.params.id });
@@ -346,10 +350,12 @@ router.put("/updateEmail/:id", authenticateToken, async (req, res) => {
   }
 });
 
-router.put("/updatePassword/:id", authenticateToken, async (req, res) => {
+router.put("/updatePassword/:id", 
+// authenticateToken, 
+async (req, res) => {
   try {
     // Kiểm tra dữ liệu đầu vào
-    const { currentPassword, newPassword } = req.body;
+    const { currentPassword, newPassword } = req.params;
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
         code: 400,
@@ -411,7 +417,9 @@ router.put("/updatePassword/:id", authenticateToken, async (req, res) => {
   }
 });
 
-router.put("/uploadAvatar/:id", authenticateToken, async (req, res) => {
+router.put("/uploadAvatar/:id", 
+// authenticateToken,
+ async (req, res) => {
   try {
     const userExist = await UserModel.findOne({ _id: req.params.id });
 

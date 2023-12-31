@@ -72,7 +72,7 @@ router.get("/:_idCate", auth, async function (req, res, next) {
   }
 });
 
-router.post("/", async function (req, res, next) {
+router.post("/", authAdmin.isAdmin, async function (req, res, next) {
   try {
     const { category, createdBy } = req.body;
 
@@ -113,8 +113,8 @@ router.post("/", async function (req, res, next) {
 // move to trash
 router.put(
   "/trash/:_id",
-  authenticateToken,
-  authAdmin.isAdmin,
+  // authenticateToken,
+  // authAdmin.isAdmin,
   async function (req, res, next) {
     try {
       const _id = req.params._id;
@@ -149,8 +149,8 @@ router.put(
 // restore from trash
 router.put(
   "/restore/:_id",
-  authenticateToken,
-  authAdmin.isAdmin,
+  // authenticateToken,
+  // authAdmin.isAdmin,
   async function (req, res, next) {
     try {
       const _id = req.params._id;
@@ -184,8 +184,8 @@ router.put(
 
 router.delete(
   "/:id",
-  authenticateToken,
-  authAdmin.isAdmin,
+  // authenticateToken,
+  // authAdmin.isAdmin,
   async function (req, res, next) {
     const cateId = req.params.id;
     const cateCheck = CateNewsModel.findOne({ _id: cateId });
