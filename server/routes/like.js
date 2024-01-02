@@ -13,7 +13,7 @@ const authAdminMiddleware = [auth, authAdmin];
 // Mảng middleware cho việc xác thực customer
 const authCustomerMiddleware = [auth, authCus];
 
-router.get("/", authAdminMiddleware, async function (req, res, next) {
+router.get("/", async function (req, res, next) {
   try {
     // Kiểm tra người dùng và vai trò
     if (!req.user || req.user.role !== "admin") {
@@ -49,7 +49,7 @@ router.get("/", authAdminMiddleware, async function (req, res, next) {
   }
 });
 
-router.get("/", authCustomerMiddleware, async function (req, res, next) {
+router.get("/", async function (req, res, next) {
   try {
     // Kiểm tra người dùng và vai trò
     if (!req.user || req.user.role !== "customer") {
@@ -81,7 +81,7 @@ router.get("/", authCustomerMiddleware, async function (req, res, next) {
   }
 });
 
-router.post("/:_idNews", authCustomerMiddleware, async function (req, res, next) {
+router.post("/:_idNews", async function (req, res, next) {
   try {
     const newsId = req.params._idNews;
     const existingLike = await LikeModel.findOne({ news: newsId, createdBy: req.user._id });
@@ -139,7 +139,7 @@ router.post("/:_idNews", authCustomerMiddleware, async function (req, res, next)
   }
 });
 
-router.post("/unlike/:_idNews", auth, async function (req, res, next) {
+router.post("/unlike/:_idNews", async function (req, res, next) {
   try {
     const newsId = req.params._idNews;
     const likeCheck = await LikeModel.findOne({ news: newsId, createdBy: req.user._id });

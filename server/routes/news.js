@@ -13,6 +13,7 @@ const cheerio = require("cheerio");
 const request = require("request-promise");
 const axios = require("axios");
 const moment = require("moment");
+const dotenv = require("dotenv");
 /* GET users listing. */
 
 const app = express();
@@ -196,7 +197,6 @@ router.get("/q", async function (req, res, next) {
 
     // Thực hiện tìm kiếm với fuse.js
     const searchResult = fuse.search(textSearch);
-console.log(searchResult);
     return res.json({
       code: 200,
       err: null,
@@ -446,26 +446,62 @@ router.get("/trash/:id", async function (req, res, next) {
   }
 });
 
-// show news of category ( status = "published" )
+// Hiển thị tin tức của một danh mục cụ thể (trạng thái = "published")
 router.get("/categories/:id", async function (req, res, next) {
   try {
-    const id = req.params.id;
-    const News = await NewsModel.find({
+    // Trích xuất ID của danh mục từ tham số URL
+    const categoryId = req.params.id;
+
+    // Lấy tin tức với trạng thái "published" cho ID danh mục đã chỉ định
+    const news = await NewsModel.find({
       status: "published",
-      cateNews: { _id: id },
+      cateNews: categoryId,
     })
       .populate("cateNews")
       .populate("createdBy");
 
+    // Trả về tin tức đã lấy
     return res.json({
       code: 200,
-      err: null,
-      data: News,
+      error: null,
+      data: news,
     });
-  } catch (err) {
-    return res.json({
+  } catch (error) {
+    // Trả về thông báo lỗi chi tiết hơn
+    return res.status(400).json({
       code: 400,
-      err: err.messege,
+      error: `Lỗi khi lấy tin tức: ${error.message}`,
+      data: null,
+    });
+  }
+});
+
+// Hiển thị tin tức của một subCateNews cụ thể (trạng thái = "published")
+router.get("/subCategories/:id", async function (req, res, next) {
+  try {
+    // Trích xuất ID của subCateNews từ tham số URL
+    const subCateId = req.params.id;
+
+    // Lấy tin tức với trạng thái "published" cho ID subCateNews đã chỉ định
+    const news = await NewsModel.find({
+      status: "published",
+      subCateNews: subCateId,
+    })
+      .populate("cateNews")
+      .populate("subCateNews")  // Thêm populate cho subCateNews
+      .populate("createdBy");
+
+    // Trả về tin tức đã lấy
+    return res.json({
+      code: 200,
+      error: null,
+      data: news,
+    });
+  } catch (error) {
+    // Trả về thông báo lỗi chi tiết hơn
+    return res.status(400).json({
+      code: 400,
+      error: `Lỗi khi lấy tin tức: ${error.message}`,
       data: null,
     });
   }
@@ -491,7 +527,7 @@ router.get("/users/:id", async function (req, res, next) {
   } catch (err) {
     return res.json({
       code: 400,
-      err: err.messege,
+      err: err.message,
       data: null,
     });
   }
@@ -526,19 +562,32 @@ router.get("/similar/:id", async function (req, res, next) {
 router.get("/:_idNews", async function (req, res, next) {
   try {
     const idNews = req.params._idNews;
-    const News = await NewsModel.find({
-      _id: idNews,
-      isDelete: false,
-    })
-      .populate("cateNews")
+
+    // Thực hiện câu truy vấn với populate cho cả cateNews và subCateNews
+    const news = await NewsModel.findById(idNews)
+      .populate({
+        path: 'cateNews',
+        populate: { path: 'subCateNews' }  // Thêm populate cho subCateNews
+      })
       .populate("createdBy");
 
-    const news = News[0];
+    // Kiểm tra nếu không tìm thấy tin tức
+    if (!news || news.isDelete) {
+      return res.json({
+        code: 404,
+        err: "Không tìm thấy tin tức",
+        data: null,
+      });
+    }
+
+    // Chuẩn bị dữ liệu trả về
     const data = {
       title: news.title,
       content: news.content,
       categoryId: news.cateNews._id,
       categoryName: news.cateNews.name,
+      subCategoryId: news.cateNews.subCateNews._id,
+      subCategoryName: news.cateNews.subCateNews.name,
       tags: news.tag,
       articlePicture: news.articlePicture,
     };
@@ -551,7 +600,7 @@ router.get("/:_idNews", async function (req, res, next) {
   } catch (err) {
     return res.json({
       code: 400,
-      err: err.messege,
+      err: err.message,
       data: null,
     });
   }
@@ -636,43 +685,105 @@ router.get("/details/:_idNews", async function (req, res, next) {
   }
 });
 // add news
-router.post("/", async function (req, res, next) {
+router.put("/:_id", async function (req, res, next) {
   try {
-    const body = req.body;
-    const file = req.files.file;
+    const _id = req.params._id;
+    const newExist = await NewsModel.findOne({ _id: _id });
 
-    if (file) {
-      file.mv(`${__dirname}/../../client/public/uploads/news/${file.name}`);
+    if (newExist) {
+      const body = req.body;
+      const files = req.files;
+
+      // Kiểm tra và thực hiện tóm tắt nếu sapo không được truyền
+      if (!body.sapo && body.content) {
+        // Tóm tắt nội dung với ChatGPT
+        const summarizedContent = await summarizeWithChatGPT(body.content);
+
+        body.sapo = summarizedContent;
+      }
+
+      // Tiếp tục với phần còn lại của mã nguồn
+
+      if (files && files.file) {
+        files.file.mv(`${__dirname}/../../client/public/uploads/news/${files.file.name}`);
+
+        const news = {
+          title: body.title,
+          content: body.content,
+          sapo: body.sapo,
+          cateNews: body.cateNews,
+          subCateNews: body.subCateNews || null,  // Bổ sung cập nhật subCateNews
+          tag: JSON.parse(body.tags),
+          articlePicture: files.file.name,
+          originalLink: body.originalLink,
+          dateCreate: body.dateCreate,
+          status: body.status,
+        };
+
+        await NewsModel.findOneAndUpdate({ _id: _id }, news);
+
+        return res.json({
+          code: 200,
+          message: "Sửa bài viết thành công",
+        });
+      } else {
+        const news = {
+          title: body.title,
+          content: body.content,
+          sapo: body.sapo,
+          cateNews: body.cateNews,
+          subCateNews: body.subCateNews || null,  // Bổ sung cập nhật subCateNews
+          tag: JSON.parse(body.tags),
+          originalLink: body.originalLink,
+          dateCreate: body.dateCreate,
+          status: body.status,
+        };
+
+        await NewsModel.findOneAndUpdate({ _id: _id }, news);
+
+        return res.json({
+          code: 200,
+          message: "Sửa bài viết thành công",
+        });
+      }
     }
-    const News = new NewsModel({
-      title: body.title,
-      //content: body.content,
-      sapo: body.sapo,
-      content: body.content,
-      cateNews: body.cateNews,
-      tag: JSON.parse(body.tags),
-      createdBy: body.createdBy,
-      articlePicture: file.name,
-      originalLink: body.originalLink,
-      dateCreate: body.dateCreate,
-      status: body.status,
-    });
-
-    const NewsClass = await News.save();
-
-    return res.json({
-      code: 200,
-      message: "Gửi yêu cầu thành công",
-      data: NewsClass,
-    });
   } catch (err) {
+    console.error(err);
     return res.json({
       code: 400,
+      message: "Sửa bài viết thất bại",
       err: err,
-      message: "Thêm thất bại",
+      data: null,
     });
   }
 });
+
+// Hàm thực hiện tóm tắt với ChatGPT
+async function summarizeWithChatGPT(content) {
+  try {
+    const response = await axios.post(
+      'https://api.openai.com/v1/engines/davinci-codex/completions',
+      {
+        prompt: content,
+        max_tokens: 30,
+        n: 1,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+      }
+    );
+
+    const summarizedContent = response.data.choices[0].text.trim();
+    return summarizedContent;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Lỗi khi tóm tắt nội dung");
+  }
+}
+
 
 // add news crawler
 router.post("/crawled_news", async function (req, res, next) {
@@ -748,6 +859,8 @@ router.post("/upload", function (req, res, next) {
     });
   }
 });
+
+
 router.put("/:_id", async function (req, res, next) {
   try {
     const _id = req.params._id;
@@ -756,6 +869,9 @@ router.put("/:_id", async function (req, res, next) {
     if (newExist) {
       const body = req.body;
       const files = req.files;
+
+      // Xác định giá trị của subCateNews từ request body
+      const subCateNews = body.subCateNews || null;
 
       if (files) {
         files.file.mv(
@@ -766,8 +882,8 @@ router.put("/:_id", async function (req, res, next) {
           title: body.title,
           content: body.content,
           sapo: body.sapo,
-          content: body.content,
           cateNews: body.cateNews,
+          subCateNews: subCateNews,  // Bổ sung cập nhật subCateNews
           tag: JSON.parse(body.tags),
           articlePicture: files.file.name,
           originalLink: body.originalLink,
@@ -775,39 +891,31 @@ router.put("/:_id", async function (req, res, next) {
           status: body.status,
         };
 
-        if (news) {
-          await NewsModel.findOneAndUpdate({ _id: _id }, news);
+        await NewsModel.findOneAndUpdate({ _id: _id }, news);
 
-          return res.json({
-            code: 200,
-            message: "Sửa bài viết thành công",
-          });
-        }
+        return res.json({
+          code: 200,
+          message: "Sửa bài viết thành công",
+        });
       } else {
         const news = {
           title: body.title,
           content: body.content,
           sapo: body.sapo,
-          content: body.content,
           cateNews: body.cateNews,
+          subCateNews: subCateNews,  // Bổ sung cập nhật subCateNews
           tag: JSON.parse(body.tags),
           originalLink: body.originalLink,
           dateCreate: body.dateCreate,
           status: body.status,
-          //    title: body.title,
-          //    content: body.content,
-          //    cateNews: body.categoryId,
-          //    tag: JSON.parse(body.tags)
         };
 
-        if (news) {
-          await NewsModel.findOneAndUpdate({ _id: _id }, news);
+        await NewsModel.findOneAndUpdate({ _id: _id }, news);
 
-          return res.json({
-            code: 200,
-            message: "Sửa bài viết thành công",
-          });
-        }
+        return res.json({
+          code: 200,
+          message: "Sửa bài viết thành công",
+        });
       }
     }
   } catch (err) {
@@ -1056,6 +1164,7 @@ router.get("/", async function (req, res, next) {
     const News = await NewsModel.find({ isDelete: false })
       .populate("cateNews")
       .populate("createdBy");
+      News.reverse();
     return res.json({
       code: 200,
       err: null,

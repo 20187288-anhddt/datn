@@ -42,7 +42,7 @@ export default function CheckAdmin(props) {
                         Dashboard
                       </Link>
                       <Link to="/admin/news" className="dropdown-item">
-                        Quản lý bào báo
+                        Quản lý bài báo
                       </Link>
                       <div className="dropdown-divider"></div>
                       <Link to="/admin/add-new" className="dropdown-item">

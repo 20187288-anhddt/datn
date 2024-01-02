@@ -54,12 +54,12 @@ export default function Comment() {
 						<span className="page-title-icon bg-gradient-danger text-white mr-2">
 							<i className="mdi mdi-format-list-bulleted" />
 						</span>
-						Manage Comments
+						Thêm từ vào danh sách đen
 					</h3>
 				</div>
 				<div className="row" style={{ padding: "0px 30px" }}>
 					<div className="col-xl-12 grid-margin">
-						<div className="font-weight-bold mb-4">Thêm từ vào ds đen:</div>
+						<div className="font-weight-bold mb-4">Thêm từ vào danh sách đen:</div>
 						<form onSubmit={handleSubmit(onSubmit)} className="w-100">
 							<Message />
 							<div className="form-group">
@@ -83,7 +83,7 @@ export default function Comment() {
 								)}
 							</div>
 							<button type="submit" className="btn btn-danger bety-btn">
-								ADD
+								Thêm
 							</button>
 						</form>
 					</div>

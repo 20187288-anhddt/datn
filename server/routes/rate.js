@@ -28,7 +28,7 @@ router.get("/", auth, async function (req, res, next) {
   }
 });
 
-router.post("/news/:_idNews", authCus, async function (req, res, next) {
+router.post("/news/:_idNews", async function (req, res, next) {
   try {
     const idNews = req.params._idNews;
     const comment = req.body.comment;

@@ -9,7 +9,7 @@ import WithAuth from "./WithAuth";
 
 // ScrollToTop
 import ScrollToTop from "./ScrollToTop";
-
+import ScrollToTopButton from './components/ScrollToTopButton';
 import "./App.css";
 
 // component lazy load
@@ -58,6 +58,7 @@ function App() {
 					</Switch>
 				</React.Suspense>
 				<div></div>
+				  <ScrollToTopButton />
 			</div>
 			<Footer />
 		</Router>

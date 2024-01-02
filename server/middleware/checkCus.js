@@ -59,4 +59,4 @@ const authCus = async function (req, res, next) {
     }
 };
 
-module.exports = authCus;
+module.exports = { authCus };

@@ -47,16 +47,23 @@ export default function NewsManagement() {
       accessor: "_id",
       sortable: true,
       filterable: true,
-      maxWidth: 250,
+      maxWidth: 150,
       Cell: props => {
         return (<a href={`/${hanldeUrlPretty(props.original.title)}/${props.original._id}`}>{props.original._id}</a>)
       }
     },
     {
-      Header: "TÊN BÀI VIẾT",
+      Header: "Tên bài báo",
       accessor: "title",
       sortable: true,
       filterable: true
+    },
+    {
+      Header: "Tác giả",
+      accessor: "source",
+      sortable: true,
+      filterable: true,
+      maxWidth: 150,
     },
     {
       Header: "Thể loại",
@@ -79,7 +86,7 @@ export default function NewsManagement() {
       }
     },
     {
-      Header: "STATUS",
+      Header: "Trạng thái",
       accessor: "status",
       sortable: true,
       className: "text-center",
@@ -99,7 +106,7 @@ export default function NewsManagement() {
       }
     },
     {
-      Header: "ACTION",
+      Header: "Hành động",
       filterable: false,
       sortable: false,
       maxWidth: 200,
@@ -110,7 +117,7 @@ export default function NewsManagement() {
             <Link
               to={`/admin/news/${props.original._id}`}
               className="btn btn-warning btn-sm mr-1"
-              title="Sửa bài viết"
+              title="Chỉnh sửa bài viết"
             >
               <i className="mdi mdi-table-edit"></i>
             </Link>
@@ -158,14 +165,15 @@ export default function NewsManagement() {
         <div className="col-xl-12 stretch-card">
           <div className="border-bottom border-secondary text-center w-100">
           <Link to="/admin/news/trash" className="btn btn-link text-dark pl-0">
-              <i className="mdi mdi-delete-variant" /> Trash
+              <i className="mdi mdi-delete-variant" /> Thùng rác
               {/* <span className="badge badge-secondary ml-1">{amountTrash}</span> */}
               <span className="sr-only">unread messages</span>
           </Link>
-            <div className="btn" style={{padding:"0px"}}>
-            <i className="mdi mdi-table-edit text-dark pl-0 cursor" /> 
-            &nbsp; Danh sách các bài báo
-            </div>
+          <Link to="/admin/news/" className="btn btn-link text-dark pl-0">
+              <i className="mdi mdi-table-edit text-dark pl-0 cursor" /> Danh sách bài báo
+              {/* <span className="badge badge-secondary ml-1">{amountTrash}</span> */}
+              <span className="sr-only">unread messages</span>
+          </Link>
           </div>
          
         </div>
@@ -177,7 +185,7 @@ export default function NewsManagement() {
             columns={columns}
             data={news}
             filterable
-            defaultPageSize={10}
+            defaultPageSize={15}
             className="table mt-3"
           />
         </div>

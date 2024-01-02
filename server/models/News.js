@@ -15,6 +15,7 @@ const schema = new Schema({
   },
   content: String,
   cateNews: { type: ObjectId, ref: "CateNews" },
+  subCateNews : { type: ObjectId, ref: "subCateNews" },
   createdBy: { type: ObjectId, ref: "User" },
   articlePicture: { type: String },
   view: {

@@ -5,6 +5,26 @@ const router = express.Router();
 const ProhibitedWordsModel = require("../models/ProhibitedWords");
 const CommentModel = require("../models/Comment");
 
+router.get("/allComments", async (req, res) => {
+  try {
+    const allComments = await CommentModel.find({}).populate("createdBy");
+    allComments.reverse();
+    if (allComments) {
+      return res.json({
+        code: 200,
+        data: allComments,
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching tất cả bình luận:", error);
+    return res.status(500).json({
+      code: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+});
+
 router.get("/prohibitedWords", async (req, res) => {
   try {
     const prohibitedWords = await ProhibitedWordsModel.find({});

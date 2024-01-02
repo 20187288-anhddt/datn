@@ -3,6 +3,7 @@ import axios from "axios";
 import { useState } from "react";
 import { setMessage } from "../../../../actions/message.action";
 import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 import ReactTable from "react-table-v6";
 import 'react-table-v6/react-table.css'
 import Confirm from "../Confirm";
@@ -12,6 +13,8 @@ export default function CategoryTrash() {
   let [deleteDisplay, setDeleteDisplay] = useState(false);
   let [IdDelete, setidDelete] = useState('');
   const [categories, setCategories] = React.useState([]);
+  const [amountCategory, setAmountCategory] = React.useState(0);
+  const [amountTrash, setAmountTrash] = React.useState(0);
   const dispatch = useDispatch();
 
   React.useEffect(() => {
@@ -21,8 +24,9 @@ export default function CategoryTrash() {
       const data = res.data.data;
 
       setCategories(data);
+      setAmountTrash(data.length);
     };
-
+    
     fetchCategories();
   }, [dispatch]);
 
@@ -34,6 +38,7 @@ export default function CategoryTrash() {
     dispatch(setMessage({ code, message }));
 
     setCategories(data);
+
   };
 
   const cancelConfirm = () => {
@@ -99,8 +104,36 @@ export default function CategoryTrash() {
           </span>
           Trash
         </h3>
+        <nav aria-label="breadcrumb">
+          <ul className="breadcrumb">
+            <li className="breadcrumb-item active" aria-current="page">
+              <span />
+              <Link
+                to={`/admin/categories/add`}
+                className="btn btn-warning btn-sm mr-1"
+                title="Thêm mới bài báo"
+              >
+                <i className="mdi mdi-table-add">Thêm mới danh mục</i>
+              </Link>
+            </li>
+          </ul>
+        </nav>
       </div>
       <div className="row">
+        <div className="col-xl-12 stretch-card">
+            <div className="border-bottom border-secondary text-center w-100">
+              <Link to="/admin/categories/trash" className="btn btn-link text-dark pl-0">
+                <i className="mdi mdi-delete-variant" /> Thùng rác
+                <span className="badge badge-secondary ml-1">{amountTrash}</span>
+                <span className="sr-only">unread messages</span>
+              </Link>
+              <Link to="/admin/categories/" className="btn btn-link text-dark pl-0">
+                <i className="mdi mdi-table-edit" /> Danh mục thể loại
+                <span className="badge badge-secondary ml-1"></span>
+                <span className="sr-only">unread messages</span>
+              </Link>
+            </div>
+          </div>
         <div className="col-xl-12">
           <Message />
         </div>

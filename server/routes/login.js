@@ -429,7 +429,7 @@ router.put("/uploadAvatar/:id",
       if (file) {
         const uploadPath = path.join(
           __dirname,
-          "../../client/public/uploads/users/",
+          "/public/uploads/users/",
           file.name
         );
 

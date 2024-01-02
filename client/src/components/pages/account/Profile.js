@@ -7,7 +7,7 @@ import { addUser } from "../../../actions/user.action";
 import { setMessage } from "../../../actions/message.action";
 
 // components
-import Infomation from "./Infomation";
+import Infomation from "./Information";
 import Avatar from "./Avatar";
 import Message from "../Message";
 import { closeMessage } from "../closeMessage";
@@ -153,7 +153,7 @@ export default function Profile() {
     <>
       <Helmet>
         <title>Thông tin cá nhân - chỉnh sửa</title>
-        <meta name="description" content="BNews kênh tin tức hàng đầu Việt Nam, thời dự, bóng đá, tin trong ngày, giải trí, bất động sản,..." />
+        <meta name="description" content="BkNews kênh tin tức hàng đầu Việt Nam, thời dự, bóng đá, tin trong ngày, giải trí, bất động sản,..." />
       </Helmet>
       <div className="container bootstrap snippet">
         <div className="row">

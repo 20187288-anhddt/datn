@@ -70,8 +70,8 @@ export default function Login({ history }) {
    return (
 	  <>
 		 <Helmet>
-			<title>Đăng nhập - BNews kênh tin tức hàng đầu Việt Nam</title>
-			<meta name="description" content="BNews kênh tin tức hàng đầu Việt Nam, thời dự, bóng đá, tin trong ngày, giải trí, bất động sản,..." />
+			<title>Đăng nhập - BkNews kênh tin tức hàng đầu Việt Nam</title>
+			<meta name="description" content="BkNews kênh tin tức hàng đầu Việt Nam, thời dự, bóng đá, tin trong ngày, giải trí, bất động sản,..." />
 		 </Helmet>
 		 {
 			!token

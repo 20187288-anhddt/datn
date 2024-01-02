@@ -5,98 +5,117 @@ import { hanldeUrlPretty } from "../../mixin/UrlPretty";
 import Loading from "../../Loading";
 
 export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightNew, categoryName }) {
-	const [tagsOtherNews, setTagsOtherNews] = useState([]);
-	const [newsByTagOtherNews, setNewsByTagOtherNews] = useState([]);
-	const [generalNews, setGeneralNews] = useState([])
+  const [tagsOtherNews, setTagsOtherNews] = useState([]);
+  const [newsByTagOtherNews, setNewsByTagOtherNews] = useState([]);
+  const [generalNews, setGeneralNews] = useState([]);
+  const [displayedNewsCount, setDisplayedNewsCount] = useState(20);
 
-	useEffect(() => {
-		// xủ lý  tin tức trùng lặp
-		if (newsHighlightId && newsByTag) {
-			const otherNews = newsByTag.filter(v => v._id !== newsHighlightId);
-			setNewsByTagOtherNews(otherNews);
-      setGeneralNews(newsByTagOtherNews.filter(news => news.tag && news.tag.length == 0).slice(0, 10));
-		}
+  useEffect(() => {
+    if (newsHighlightId && newsByTag) {
+      const otherNews = newsByTag.filter((v) => v._id !== newsHighlightId);
+      setNewsByTagOtherNews(otherNews);
+      setGeneralNews(otherNews.filter((news) => news.tag && news.tag.length === 0).slice(0, displayedNewsCount));
+    }
 
-		// xủ lý tin tức có tags giống với tin tức nỗi bật
-		if (highlightNew && tags) {
-			const highlightNewTags = highlightNew.tag;
+    if (highlightNew && tags) {
+      const highlightNewTags = highlightNew.tag;
 
-			if (highlightNewTags) {
-				let tagsOtherNews = [];
-				const otherNewsTags = tags.filter((tag) => !highlightNewTags.includes(tag));
-				setTagsOtherNews(otherNewsTags);
-			}
-		}
+      if (highlightNewTags) {
+        const otherNewsTags = tags.filter((tag) => !highlightNewTags.includes(tag));
+        setTagsOtherNews(otherNewsTags);
+      }
+    }
+  }, [tags, newsByTag, newsHighlightId, highlightNew, displayedNewsCount]);
 
-	}, [tags, newsByTag, newsHighlightId, highlightNew]);
+  const handleScroll = () => {
+    const scrollPosition = window.innerHeight + document.documentElement.scrollTop;
+    const pageHeight = document.documentElement.offsetHeight;
 
-	// just show news <= 50
-	newsByTagOtherNews.length = 50;
+    if (scrollPosition === pageHeight) {
+      // Nếu người dùng đã kéo đến cuối trang, tăng số lượng bài viết được hiển thị
+      setDisplayedNewsCount((prevCount) => prevCount + 20);
+    }
+  };
 
-	return (
-		<React.Fragment>
-			{/* <span>{JSON.stringify(newsByTagOtherNews)}</span> */}
-			{
-				tagsOtherNews && (
-					tagsOtherNews.map((tag, index) => (
-						<div className="" key={index}>
-							<h3 className="mb-3 mt-3 text-red font-weight">{tag}</h3>
-							{
-								newsByTagOtherNews && (
-									newsByTagOtherNews.map((item, index) => (
-										item.tag.includes(tag) && (
-											<Link to={`/${hanldeUrlPretty(item.title)}/${item._id}`} key={index} className="other-new p-3 bg-white rounded text-decoration-none" target="_blank" rel="noopener noreferrer" >
-												<div className="other-new__image border border-secondary">
-													<img
-														src={item.content === "" ? item.articlePicture : `/uploads/news/${item.articlePicture}`}
-														alt={item.title}
-													/>
-												</div>
-												<div className="other-new__info">
-													<h4 className="other-new__title">{item.title}</h4>
-													<i className="mdi mdi-av-timer" /> {moment(item.dateCreate).format("DD-MM-YYYY")} -{" "}
-													<i className="mdi mdi-eye" /> {item.view}
-													<br></br>
-													{item.source && (<span className="news-source-title"> Nguồn: {item.source}</span>)}
-												</div>
-											</Link>
-										)
-									))
-								)
-							}
-						</div>
-					))
-				)
-			}
-			<h3 className="mb-3 text-red font-weight pt-3">
-				Tin tức tổng hợp về {categoryName}
-			</h3>
-			<div className="col-lg-12 pt-1">
-				<div className="row">
-					{generalNews ? (
-						generalNews.map((item, index) => (
-							<Link to={`/${hanldeUrlPretty(item.title)}/${item._id}`} key={index} className="additonal-new p-3 bg-white rounded text-decoration-none col-lg-5 m-2 text-color" target="_blank" rel="noopener noreferrer" >
-								<div className="other-new__image border border-secondary">
-									<img
-										src={item.content === "" ? item.articlePicture : `/uploads/news/${item.articlePicture}`}
-										alt={item.title}
-									/>
-								</div>
-								<div className="other-new__info">
-									<h4 className="other-new__title">{item.title}</h4>
-									<i className="mdi mdi-av-timer" /> {moment(item.dateCreate).format("DD-MM-YYYY")} -{" "}
-									<i className="mdi mdi-eye" /> {item.view}
-									<br></br>
-									{item.source && (<span className="news-source-title"> Nguồn: {item.source}</span>)}
-								</div>
-							</Link>
-						))
-					) : (
-						<Loading />
-					)}
-				</div>
-			</div>
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []); // Chạy chỉ một lần khi thành phần được tạo
 
-		</React.Fragment>
-	)
+  return (
+    <React.Fragment>
+      {tagsOtherNews && (
+        tagsOtherNews.map((tag, index) => (
+          <div className="" key={index}>
+            <h3 className="mb-3 mt-3 text-red font-weight">{tag}</h3>
+            {newsByTagOtherNews && (
+              newsByTagOtherNews.map((item, index) => (
+                item.tag.includes(tag) && (
+                  <Link
+                    to={`/${hanldeUrlPretty(item.title)}/${item._id}`}
+                    key={index}
+                    className="other-new p-3 bg-white rounded text-decoration-none"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <div className="other-new__image border border-secondary">
+                      <img
+                        src={item.content === "" ? item.articlePicture : `/uploads/news/${item.articlePicture}`}
+                        alt={item.title}
+                      />
+                    </div>
+                    <div className="other-new__info">
+                      <h4 className="other-new__title">{item.title}</h4>
+                      <i className="mdi mdi-av-timer" /> {moment(item.dateCreate).format("DD-MM-YYYY")} -{" "}
+                      <i className="mdi mdi-eye" /> {item.view}
+                      <br></br>
+                      {item.source && (<span className="news-source-title"> Nguồn: {item.source}</span>)}
+                    </div>
+                  </Link>
+                )
+              ))
+            )}
+          </div>
+        ))
+      )}
+
+      <h3 className="mb-3 text-red font-weight pt-3">
+        Tin tức tổng hợp về {categoryName}
+      </h3>
+
+      <div className="col-lg-12 pt-1">
+        <div className="row">
+          {generalNews ? (
+            generalNews.map((item, index) => (
+              <Link
+                to={`/${hanldeUrlPretty(item.title)}/${item._id}`}
+                key={index}
+                className="additonal-new p-3 bg-white rounded text-decoration-none col-lg-5 m-2 text-color"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div className="other-new__image border border-secondary">
+                  <img
+                    src={item.content === "" ? item.articlePicture : `/uploads/news/${item.articlePicture}`}
+                    alt={item.title}
+                  />
+                </div>
+                <div className="other-new__info">
+                  <h4 className="other-new__title">{item.title}</h4>
+                  <i className="mdi mdi-av-timer" /> {moment(item.dateCreate).format("DD-MM-YYYY")} -{" "}
+                  <i className="mdi mdi-eye" /> {item.view}
+                  <br></br>
+                  {item.source && (<span className="news-source-title"> Nguồn: {item.source}</span>)}
+                </div>
+              </Link>
+            ))
+          ) : (
+            <Loading />
+          )}
+        </div>
+      </div>
+    </React.Fragment>
+  );
 }

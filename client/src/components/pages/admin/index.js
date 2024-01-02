@@ -9,7 +9,8 @@ import { Chart }            from 'react-chartjs-2'
 import Category from "./manage-category/CategoryManagement";
 import CategoryTrash from "./manage-category/CategoryTrash";
 import AddCategory from "./manage-category/AddCategory";
-import Comment from "./manage-comment/Comment";
+import ProhibitedWords from "./manage-comment/ProhibitedWords";
+import CommentManagement from "./manage-comment/CommentManagement";
 import EditNews from "./manage-news/EditNews";
 import NewsManagement from "./manage-news/NewsManagement";
 import AddNews from "./manage-news/AddNews";
@@ -33,7 +34,8 @@ export default function Admin() {
               <Route exact path="/admin/categories/add" component={AddCategory} />
               <Route path="/admin/categories" component={Category} />
               {/* Comment manage */}
-              <Route path="/admin/manage-comments" component={Comment} />
+              <Route exact path="/admin/ProhibitedWords" component={ProhibitedWords} />
+              <Route exact path="/admin/manage-comments" component={CommentManagement} />
               {/* News manage */}
               <Route exact path="/admin/news" component={NewsManagement} />
               <Route exact path="/admin/news/add" component={AddNews} />

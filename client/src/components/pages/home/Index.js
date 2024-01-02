@@ -27,7 +27,7 @@ export default function Home() {
           </div>
           <div className="col-lg-6 col-md-7 main-featured-new">
             <h3 className="mb-3 text-red font-weight">
-              Tin tức nổi bật trong 24h qua
+              Tin tức được quan tâm nhất trong 24h qua
             </h3>
             <FeaturedNew />
           </div>

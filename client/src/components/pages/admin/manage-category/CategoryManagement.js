@@ -91,6 +91,47 @@ export default function Category() {
       }
     }
   ];
+
+  const columnsSubCate = [
+    {
+      Header: "TÊN DANH MỤC",
+      accessor: "name",
+      sortable: true,
+      className: "text-left"
+    },
+    {
+      Header: "DANH MỤC CHA",
+      accessor: "parentCateNewsName.name",
+      sortable: true,
+      className: "text-left",
+    },
+    {
+      Header: "ACTION",
+      filterable: false,
+      sortable: false,
+      maxWidth: 200,
+      Cell: props => {
+        return (
+          <div>
+            <button
+              onClick={() => {
+                setDeleteDisplay(true);
+                setidDelete(props.original._id);
+                // hanldeTrash(props.original._id)
+              }}
+              type="button"
+              className="btn btn-danger btn-sm"
+              title="Bỏ chuyên mục con"
+            >
+              <i className="mdi mdi-delete"></i>
+            </button>
+          </div>
+        );
+      }
+    }
+  ];
+
+
   return (
     <div className="content-wrapper">
       <div className="page-header">
@@ -135,16 +176,18 @@ export default function Category() {
         <div className="col-xl-12">
           <Message />
         </div>
+
         <div className="col-xl-12 grid-margin stretch-card w-100" style={{ padding: "0px 30px" }}>
           <ReactTable
-            columns={columns}
+            columns={columnsSubCate}
             data={categories}
             filterable
-            defaultPageSize={5}
+            defaultPageSize={10}
             noDataText={"Please wait..."}
             className="table mt-3 text-center"
           />
         </div>
+
       </div>
       {deleteDisplay && <Confirm
         callBackCancel={() => {

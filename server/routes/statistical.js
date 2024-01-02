@@ -2,6 +2,8 @@ const express = require("express");
 const cron = require("node-cron");
 const ViewModel = require("../models/View");
 const StatisticModel = require("../models/Statistical");
+const NewsModel = require("../models/News");
+const CateNewsModel = require("../models/CateNews");
 
 const moment = require("moment");
 let timedate = moment().format();
@@ -24,6 +26,12 @@ function getEndDay(){
     .toDate()
   );
 }
+
+const startOfDay = new Date();
+startOfDay.setHours(0, 0, 0, 0);
+
+const endOfDay = new Date();
+endOfDay.setHours(23, 59, 59, 999);
 
 // Endpoint để thêm lượt xem cho tin tức trong ngày
 router.post("/news", async (req, res) => {
@@ -108,6 +116,7 @@ router.get('/viewsOfDay', async (req, res) => {
     });
   }
 });
+
 router.get("/viewsOfMonth", async (req, res) => {
   try {
     const month = req.query.month;
@@ -151,5 +160,308 @@ router.get("/viewsOfMonth", async (req, res) => {
     });
   }
 });
+
+
+router.get('/postOfDay', async (req, res) => {
+  try {
+    // Truy vấn để đếm số lượng ngày tạo là hôm nay
+    const postCountOfDay = await NewsModel.aggregate([
+      {
+        $match: {
+          isDelete: false,
+          dateCreate: { $gte: startOfDay, $lte: endOfDay },
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      code: 200,
+      message: "Lấy số lượng tin tức đã tạo trong ngày thành công",
+      data: { postCountOfDay },
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      code: 500,
+      message: "Đã xảy ra lỗi khi lấy số lượng tin tức đã tạo trong ngày",
+      error: error.message || "Lỗi không xác định",
+      data: null,
+    });
+  }
+});
+
+const startOfWeek = moment().startOf('isoWeek').toDate();
+const endOfWeek = moment().endOf('isoWeek').toDate();
+
+router.get("/postOfWeek", async (req, res) => {
+  try {
+    const postOfWeek = await NewsModel.aggregate([
+      {
+        $match: {
+          isDelete: false,
+          dateCreate: { $gte: startOfWeek, $lte: endOfWeek },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalPosts: { $sum: 1 }, // Đếm tổng số bài viết
+          posts: { $push: "$$ROOT" }, // Đưa toàn bộ thông tin các bài viết vào mảng
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Loại bỏ trường _id
+          totalPosts: 1,
+          posts: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      code: 200,
+      message: "Lấy số lượng bài viết trong tuần thành công",
+      data: postOfWeek[0], // Vì $group trả về một mảng, nên lấy phần tử đầu tiên
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      code: 500,
+      message: "Đã xảy ra lỗi khi lấy số lượng lượt xem trong tuần",
+      error: error.message || "Lỗi không xác định",
+      data: null,
+    });
+  }
+});
+
+router.get("/viewsByCategory", async (req, res) => {
+  try {
+    const viewsByCategory = await NewsModel.aggregate([
+      {
+        $lookup: {
+          from: "catenews", // MongoDB collection name (lowercase)
+          localField: "cateNews",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      {
+        $unwind: "$category",
+      },
+      {
+        $match: {
+          isDelete: false,
+        },
+      },
+      {
+        $group: {
+          _id: "$category.name",
+          totalViews: { $sum: "$view" }, // Assuming view is the field representing views in the News schema
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          category: "$_id",
+          totalViews: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      code: 200,
+      message: "Lấy số lượng lượt xem theo thể loại bài viết thành công",
+      data: viewsByCategory,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      code: 500,
+      message: "Đã xảy ra lỗi khi lấy số lượng lượt xem theo thể loại bài viết",
+      error: error.message || "Lỗi không xác định",
+      data: null,
+    });
+  }
+});
+
+
+router.get("/articleCountByCategory", async (req, res) => {
+  try {
+    const articleCountByCategory = await NewsModel.aggregate([
+      {
+        $lookup: {
+          from: "catenews", // MongoDB collection name (lowercase)
+          localField: "cateNews",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      {
+        $unwind: "$category",
+      },
+      {
+        $match: {
+          isDelete: false,
+        },
+      },
+      {
+        $group: {
+          _id: "$category.name",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          category: "$_id",
+          count: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      code: 200,
+      message: "Lấy số lượng bài viết theo thể loại thành công",
+      data: articleCountByCategory,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      code: 500,
+      message: "Đã xảy ra lỗi khi lấy số lượng bài viết theo thể loại",
+      error: error.message || "Lỗi không xác định",
+      data: null,
+    });
+  }
+});
+
+router.get("/articleCountByAuthor", async (req, res) => {
+  try {
+    const articleCountByAuthor = await NewsModel.aggregate([
+      {
+        $lookup: {
+          from: "users", // MongoDB collection name (lowercase)
+          localField: "createdBy",
+          foreignField: "_id",
+          as: "author",
+        },
+      },
+      {
+        $unwind: "$author",
+      },
+      {
+        $match: {
+          isDelete: false,
+        },
+      },
+      {
+        $group: {
+          _id: "$author.username", // Assuming the author's username is unique
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          author: "$_id",
+          count: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      code: 200,
+      message: "Lấy số lượng bài viết theo tác giả thành công",
+      data: articleCountByAuthor,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      code: 500,
+      message: "Đã xảy ra lỗi khi lấy số lượng bài viết theo tác giả",
+      error: error.message || "Lỗi không xác định",
+      data: null,
+    });
+  }
+});
+
+router.get("/articleCountBySource", async (req, res) => {
+  try {
+    // Get start and end dates from the request query parameters
+    const startDate = new Date(req.query.startDate);
+    const endDate = new Date(req.query.endDate);
+
+    const articleCountBySource = await NewsModel.aggregate([
+      {
+        $match: {
+          isDelete: false,
+          dateCreate: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$source",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          source: "$_id",
+          count: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      code: 200,
+      message: "Lấy số lượng bài viết theo nguồn thành công",
+      data: articleCountBySource,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      code: 500,
+      message: "Đã xảy ra lỗi khi lấy số lượng bài viết theo nguồn",
+      error: error.message || "Lỗi không xác định",
+      data: null,
+    });
+  }
+});
+
+router.get("/topMostViewed", async (req, res) => {
+  try {
+    const topMostViewed = await NewsModel
+      .find({ isDelete: false }) // Exclude deleted articles
+      .sort({ view: -1 }) // Sort by view count in descending order
+      .limit(20) // Limit the result to the top 10 articles
+
+    res.status(200).json({
+      code: 200,
+      message: "Lấy danh sách 20 bài viết có lượt xem cao nhất thành công",
+      data: topMostViewed,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      code: 500,
+      message: "Đã xảy ra lỗi khi lấy danh sách 20 bài viết có lượt xem cao nhất",
+      error: error.message || "Lỗi không xác định",
+      data: null,
+    });
+  }
+});
+
+
 
 module.exports = router;

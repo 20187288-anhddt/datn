@@ -15,10 +15,14 @@ export default function AddNews() {
   const [tagAlready, setTagAlready] = useState("");
   const [tags, setTags] = useState([]);
   const [file, setFile] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [subCategories, setSubCategories] = useState([]);
   const [categories, setCategories] = useState([]);
 
+  
+
   const { register, handleSubmit, errors } = useForm();
-  const appState = useSelector(state => state);
+  const appState = useSelector((state) => state);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -34,7 +38,31 @@ export default function AddNews() {
     fetchCategories();
   }, [dispatch]);
 
-  const hanldChangeTag = e => {
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const res = await axios.get("/cateNews");
+      const data = res.data.data;
+      setCategories(data);
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const fetchSubCategories = async () => {
+      if (selectedCategory) {
+        const res = await axios.get(`/cateNews/${selectedCategory}/subcategories`);
+        const data = res.data.data;
+        setSubCategories(data);
+      }
+    };
+
+    fetchSubCategories();
+  }, [selectedCategory]);
+
+
+
+  const hanldChangeTag = (e) => {
     setTag(e.target.value);
   };
 
@@ -43,38 +71,37 @@ export default function AddNews() {
       setTagAlready("Bạn cần nhập tag");
       return;
     }
-    const tagExist = tags.filter(v => v.toLowerCase() === tag.toLowerCase());
+    const tagExist = tags.filter((v) => v.toLowerCase() === tag.toLowerCase());
     if (tagExist.length > 0) {
       setTagAlready("Tag đã tồn tại");
       return;
-    } 
+    }
     setTags([...tags, tag]);
     setTagAlready("");
   };
 
-  // remove tag
-  const hanldeRemoveTag = index => {
+  const hanldeRemoveTag = (index) => {
     const newTag = [...tags];
     newTag.splice(index, 1);
 
     setTags(newTag);
   };
 
-  const hanldChangeContent = content => {
+  const hanldChangeContent = (content) => {
     setContent(content);
   };
 
-  const hanldeChangeUpload = e => {
+  const hanldeChangeUpload = (e) => {
     setFile(e.target.files[0]);
   };
 
-
-  const onSunmit = async data => {
+  const onSunmit = async (data) => {
     try {
       const formData = new FormData();
 
       formData.append("title", data.title);
       formData.append("cateNews", data.category);
+      formData.append("subCateNews", data.subCategory);  // Thêm subCateNews vào formData
       formData.append("content", content || "");
       formData.append("tags", JSON.stringify(tags));
       formData.append("createdBy", appState.users.data._id);
@@ -85,7 +112,6 @@ export default function AddNews() {
 
       const res = await axios.post("/news", formData);
       const { code, message } = res.data;
-      console.log(data)
 
       dispatch(setMessage({ code, message }));
       dispatch(closeMessage());
@@ -93,6 +119,8 @@ export default function AddNews() {
       console.log(error);
     }
   };
+
+
 
   return (
     <div className="content-wrapper">
@@ -123,7 +151,7 @@ export default function AddNews() {
               )}
             </div>
             <div className="form-group">
-              <label>Sapo:</label>
+              <label>Tóm tắt bài viết (Nếu bỏ trống trường này, hệ thống sẽ tự cập nhật nội dung tóm tắt bài viết):</label>
               <input
                 type="text"
                 name="sapo"
@@ -157,6 +185,9 @@ export default function AddNews() {
                 className="form-control"
                 style={{ border: `${errors.category ? "1px solid red" : ""}` }}
                 ref={register({ required: true })}
+                onChange={(e) => {
+                  setSelectedCategory(e.target.value);
+                }}
               >
                 {categories.map((category, index) => (
                   <option key={index} value={category._id}>
@@ -165,6 +196,23 @@ export default function AddNews() {
                 ))}
               </select>
             </div>
+
+            <div className="form-group">
+              <label>Thể loại nhỏ hơn:</label>
+              <select
+                name="subCategory"
+                className="form-control"
+                style={{ border: `${errors.subCategory ? "1px solid red" : ""}` }}
+                ref={register({ required: true })}
+              >
+                {subCategories.map((subCategory, index) => (
+                  <option key={index} value={subCategory._id}>
+                    {subCategory.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="form-group">
               <label>Tags:</label>
               <input
