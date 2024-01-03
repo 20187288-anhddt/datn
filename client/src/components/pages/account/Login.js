@@ -2,7 +2,7 @@ import React from "react";
 import { useState } from "react";
 import {Helmet} from 'react-helmet';
 import axios from "axios";
-import { Redirect } from "react-router-dom";
+import { Redirect, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { addUser } from "../../../actions/user.action";
@@ -85,10 +85,14 @@ export default function Login({ history }) {
 							  <input
 								 type="text"
 								 name="email"
+								 style={{ border: `${errors.password ? "1px solid red" : ""}` }}
 								 className="form-control"
-								 placeholder="Enter email..."
+								 placeholder="Nhập địa chỉ email..."
 								 ref={register({ required: true })}
 							  />
+							  {errors.email && (
+								 <small className="text-danger">Bạn phải điền đầy đủ thông tin...</small>
+							  )}
 							  
 						   </div>
 						   <div className="form-group">
@@ -97,16 +101,26 @@ export default function Login({ history }) {
 								 name="password"
 								 style={{ border: `${errors.password ? "1px solid red" : ""}` }}
 								 className="form-control"
-								 placeholder="Password..."
+								 placeholder="Nhập mật khẩu..."
 								 ref={register({ required: true })}
 							  />
 							  {errors.password && (
-								 <small className="text-danger">This field is required</small>
+								 <small className="text-danger">Bạn phải điền đầy đủ thông tin...</small>
 							  )}
+							  			<div className="mt-2 d-flex justify-content-end">
+										{/* Liên kết "Quên mật khẩu" */}
+										<Link to="/forgot-password">Quên mật khẩu</Link>
+										</div>
 						   </div>
+
 						   <button type="submit" className="btn btn-danger mt-3">
 							  Đăng nhập
 						   </button>
+						   <div className="mt-2">
+              {/* Liên kết "Quay lại" */}
+              Nếu bạn chưa có tài khoản, hãy <Link to="/register"><i class="" aria-hidden="true"></i> tạo tài khoản</Link>
+            </div>
+
 						</form>
 					 </div>
 				  </div>

@@ -99,13 +99,13 @@ export default function NavUser(props) {
                   <div
                     className="dropdown-menu shadow"
                     aria-labelledby="navbarDropdown"
-                  >
+                  > <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
                     <Link className="dropdown-item" to="/login">
                       <i className="fas fa-sign-in-alt mr-4"></i>
                       <span>Đăng nhập</span>
                     </Link>
                     <Link className="dropdown-item" to="/register">
-                      <i className="far fa-registered mr-4"></i>
+                    <i class="fas fa-sign-out-alt mr-4" ></i>
                       <span>Đăng ký</span>
                     </Link>
                   </div>

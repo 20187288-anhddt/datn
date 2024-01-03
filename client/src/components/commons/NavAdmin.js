@@ -64,17 +64,19 @@ export default function NavAdmin(props) {
                   )}
                 </a>
                 {appState.users.data ? (
+                  
                   <div
                     className="dropdown-menu shadow"
                     aria-labelledby="navbarDropdown"
                   >
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
                     <Link className="dropdown-item" to="/profile">
-                      <i className="far fa-address-card mr-4"></i>
+                    <i class="fa fa-address-card mr-2" aria-hidden="true"></i>
                       <span>Thông tin</span>
                     </Link>
                     <Link className="dropdown-item" to="/admin">
-                      <i className="far fa-plus-square mr-4"></i>
-                      <span>Admin</span>
+                      <i className="fa fa-cogs mr-2"></i>
+                      <span>Trang Admin</span>
                     </Link>
                     <div className="dropdown-divider" />
                     <Link
@@ -82,7 +84,7 @@ export default function NavAdmin(props) {
                       className="dropdown-item"
                       onClick={hanldLogout}
                     >
-                      <i className="fas fa-sign-out-alt mr-4"></i>
+                      <i className="fas fa-sign-out-alt mr-2"></i>
                       <span>Đăng xuất</span>
                     </Link>
                   </div>
@@ -90,13 +92,13 @@ export default function NavAdmin(props) {
                   <div
                     className="dropdown-menu shadow"
                     aria-labelledby="navbarDropdown"
-                  >
+                  ><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
                     <Link className="dropdown-item" to="/login">
                       <i className="fas fa-sign-in-alt mr-4"></i>
                       <span>Đăng nhập</span>
                     </Link>
                     <Link className="dropdown-item" to="/register">
-                      <i className="far fa-registered mr-4"></i>
+                    <i class="fa fa-sign-out" aria-hidden="true"></i>
                       <span>Đăng ký</span>
                     </Link>
                   </div>

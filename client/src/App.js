@@ -19,6 +19,9 @@ const Profile = React.lazy(() => import("./components/pages/account/Profile"));
 const Register = React.lazy(() =>
 	import("./components/pages/account/Register")
 );
+const ForgotPassword = React.lazy(() =>
+	import("./components/pages/account/ForgotPassword")
+);
 const Contact = React.lazy(() => import("./components/pages/Contact"));
 const NotFound = React.lazy(() => import("./components/pages/404NotFound"));
 
@@ -51,6 +54,7 @@ function App() {
 						/>
 						<Route path="/login" component={Login} />
 						<Route path="/register" component={Register} />
+						<Route path="/forgot-password" component={ForgotPassword} />
 						<Route path="/profile" component={Profile} />
 						<Route path="/category/*/:id" component={Category} />
 						<Route path="/*/:id" component={Detail} />

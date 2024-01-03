@@ -71,11 +71,11 @@ export default function Register({ history }) {
                     name="userName"
                     style={{ border: `${errors.userName ? "1px solid red" : ""}` }}
                     className="form-control"
-                    placeholder="Enter your name..."
+                    placeholder="Nhập username (họ tên) của bạn"
                     ref={register({ required: true })}
                   />
                   {errors.userName && (
-                    <small className="text-danger">This field is required</small>
+                    <small className="text-danger">Phải phải nhập đầy đủ thông tin</small>
                   )}
                 </div>
                 <div className="form-group">
@@ -84,15 +84,15 @@ export default function Register({ history }) {
                     name="email"
                     style={{ border: `${errors.email ? "1px solid red" : ""}` }}
                     className="form-control"
-                    placeholder="Enter email..."
+                    placeholder="Nhập địa chỉ email..."
                     ref={register({ required: true, pattern: /^\S+@\S+$/i })}
                   />
                   <small id="emailHelp" className="form-text text-muted">
-                    We'll never share your email with anyone else.
+                    Chúng tôi không bao giờ chia sẻ thông tin cá nhân của bạn ra ngoài
                   </small>
                   {errors.email && (
                     <small className="text-danger">
-                      This field is required and that is an email address match (ex:
+                      Bạn phải nhập đúng định dang email (VD:
                       example123@gmail.com)
                     </small>
                   )}
@@ -103,11 +103,11 @@ export default function Register({ history }) {
                     name="password"
                     style={{ border: `${errors.password ? "1px solid red" : ""}` }}
                     className="form-control"
-                    placeholder="Enter password..."
+                    placeholder="Nhập mật khẩu..."
                     ref={register({ required: true })}
                   />
                   {errors.password && (
-                    <small className="text-danger">This field is required</small>
+                    <small className="text-danger">Phải phải nhập đầy đủ thông tin</small>
                   )}
                 </div>
                 <div className="form-group">
@@ -116,16 +116,19 @@ export default function Register({ history }) {
                     name="passwordAgain"
                     style={{ border: `${errors.password ? "1px solid red" : ""}` }}
                     className="form-control"
-                    placeholder="Enter password again..."
+                    placeholder="Nhập lại mật khẩu..."
                     ref={register({ required: true })}
                   />
                   {errors.passwordAgain && (
-                    <small className="text-danger">This field is required</small>
+                    <small className="text-danger">Phải phải nhập đầy đủ thông tin</small>
                   )}
                 </div>
                 <button type="submit" className="btn btn-danger mt-3">
                   Đăng ký
-                </button>
+                </button><div className="mt-2">
+              {/* Liên kết "Quay lại" */}
+              Nếu bạn đã có tài khoản, hãy <Link to="/login"><i class="" aria-hidden="true"></i> đăng nhập</Link>
+            </div>
               </form>
             </div>
           </div>

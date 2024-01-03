@@ -147,7 +147,7 @@ export default function AddNews() {
                 ref={register({ required: true })}
               />
               {errors.title && (
-                <small className="text-danger">This field is required</small>
+                <small className="text-danger">Bạn phải điền đầy đủ thông tin...</small>
               )}
             </div>
             <div className="form-group">
@@ -277,7 +277,7 @@ export default function AddNews() {
                 </label>
               </div>
               {errors.filename && (
-                <small className="text-danger">This field is required</small>
+                <small className="text-danger">Bạn phải điền đầy đủ thông tin...</small>
               )}
             </div>
             <div className="form-group">
