@@ -7,7 +7,7 @@ const setCategories = (data) => ({
 
 export const getCategories = () => {
   return async dispatch => {
-    const res = await axios.get("/cateNews");
+    const res = await axios.get("/cateNews/cateNews");
     const data = res.data.data;
     
     dispatch(setCategories(data));

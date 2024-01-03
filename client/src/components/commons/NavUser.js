@@ -41,12 +41,13 @@ export default function NavUser(props) {
           <span className="navbar-toggler-icon" />
         </button>
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul className="navbar-nav mr-auto">
+        <ul className="navbar-nav mr-auto">
             {appState.categories.data
               ? appState.categories.data.map((item, index) => (
                   <li key={index} className="nav-item">
-                    <Link className="nav-link" to={`/category/${item.name && hanldeUrlPretty(item.name)}/${item._id}`}>
-                      {item.name ? item.name.toUpperCase() : null}
+                    <Link className="nav-link category-link" to={`/category/${item.name && hanldeUrlPretty(item.name)}/${item._id}`}
+                    >
+                      {item.name ? <h5><strong>{item.name.toUpperCase()}</strong></h5> : null}
                     </Link>
                   </li>
                 ))

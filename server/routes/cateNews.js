@@ -50,9 +50,9 @@ router.get("/cateNews", async function (req, res, next) {
 
 router.get("/subCateNews", async function (req, res, next) {
   try {
-    const cateNews = await CateNewsModel.find({ isDelete: false, parentCateNews: { $ne: null } }).populate('parentCateNewsName');
+    const subCateNews = await CateNewsModel.find({ isDelete: false, parentCateNews: { $ne: null } }).populate('parentCateNewsName');
      // Đảo ngược mảng trực tiếp
-     cateNews.reverse();
+     subCateNews.reverse();
     return res.json({
       code: 200,
       error: null,

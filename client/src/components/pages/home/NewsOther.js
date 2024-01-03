@@ -73,7 +73,14 @@ export default function NewsOther() {
                       Nguồn: {item.source}
                     </span>
                   )}
+                  
                 </p>
+                {item.sapo && (
+                    <span className="mx-auto">
+                      {" "}
+                    {item.sapo}
+                    </span>
+                  )}
               </div>
             </Link>
           ))

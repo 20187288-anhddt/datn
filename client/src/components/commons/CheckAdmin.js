@@ -13,20 +13,20 @@ export default function CheckAdmin(props) {
                     </a>
                     <div className="dropdown-menu" aria-labelledby="navbarDropdown">
                       <Link to="/admin" className="dropdown-item">
-                        Dashboard
+                      <i className="fas fa-tachometer-alt mr-4"></i>Dashboard
                       </Link>
                       <Link to="/admin/manage-members" className="dropdown-item">
-                        Quản lý thành viên
+                      <i className="fas fa-users mr-4"></i>Quản lý thành viên
                       </Link>
                       <Link to="/admin/manage-comments" className="dropdown-item">
-                        Quản lý bình luận
+                      <i className="fas fa-comments mr-4"></i>Quản lý bình luận
                       </Link>
                       <Link to="/admin/categories" className="dropdown-item">
-                        Thể loại
+                      <i className="fas fa-list-alt mr-4"></i>Thể loại
                       </Link>
                       <div className="dropdown-divider"></div>
-                      <Link to="/admin/add-new-category" className="dropdown-item">
-                        + Thêm mới thể loại
+                      <Link to="/admin/news/add" className="dropdown-item">
+                      <i className="fas fa-newspaper mr-4"></i>Thêm mới bài báo
                       </Link>
                     </div>
                   </li>

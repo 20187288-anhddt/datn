@@ -1,15 +1,18 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-
+import { getCategories } from "../../actions/category.action";
 import { addUser } from "../../actions/user.action";
-
+import { hanldeUrlPretty } from "../mixin/UrlPretty";
 import CheckAdmin from "./CheckAdmin";
 
 export default function NavAdmin(props) {
   const appState = useSelector(state => state);
   const dispatch = useDispatch();
 
+  React.useEffect(() => {
+    dispatch(getCategories());
+  }, [dispatch]);
   const hanldLogout = () => {
     dispatch(addUser(null));
 
@@ -18,7 +21,7 @@ export default function NavAdmin(props) {
   };
 
   return (
-    <nav className="navbar fixed-top navbar-expand-xl navbar-dark bg-dark shadow-sm py-0 px-2">
+    <nav className="navbar fixed-top navbar-expand-xl navbar-dark bg-dark shadow-sm py-0 px-3">
       <div className="container">
         <Link to="/" className="navbar-brand">
           <img width="100%" src="/Logo-news.png" alt="Logo news" />
@@ -35,8 +38,21 @@ export default function NavAdmin(props) {
           <span className="navbar-toggler-icon" />
         </button>
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul className="navbar-nav mr-auto">
-            <CheckAdmin role={props.role} />
+        <ul className="navbar-nav mr-auto">
+            {appState.categories.data
+              ? appState.categories.data.map((item, index) => (
+                  <li key={index} className="nav-item">
+                    <Link className="nav-link category-link" to={`/category/${item.name && hanldeUrlPretty(item.name)}/${item._id}`}
+                    >
+                      {item.name ? <h5><strong>{item.name.toUpperCase()}</strong></h5> : null}
+                    </Link>
+                  </li>
+                ))
+              : null}
+          </ul>
+        
+          <ul className="navbar-nav mr-auto align-items-center">
+            <h5><CheckAdmin role={props.role} /></h5>
           </ul>
           <div>
             <ul className="navbar-nav mr-0">

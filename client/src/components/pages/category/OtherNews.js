@@ -72,6 +72,8 @@ export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightN
                       <i className="mdi mdi-eye" /> {item.view}
                       <br></br>
                       {item.source && (<span className="news-source-title"> Nguồn: {item.source}</span>)}
+                      <br></br>
+                      {item.sapo && (<span className="news-source-title"> {item.sapo}</span>)}
                     </div>
                   </Link>
                 )
