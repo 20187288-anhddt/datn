@@ -31,13 +31,24 @@ export default function ProhibitedWords() {
         setDeleteDisplay(false)
       }
         // move to trash
-  const deleteComment = async id => {
-        const res = await axios.put(`/comments/`);
-        const { code, message, data } = res.data;
-        dispatch(setMessage({ code, message }));
-        dispatch(closeMessage());
-        setReset(!reset)
-    };
+        const deleteComment = async (id) => {
+          try {
+            const res = await axios.delete(`/comments/${id}`);
+            const { code, message, data } = res.data;
+        
+            // Assuming you have Redux actions like setMessage and closeMessage
+            dispatch(setMessage({ code, message }));
+            dispatch(closeMessage());
+        
+            // Assuming reset is a state and setReset is a function to update the state
+            setReset((prevReset) => !prevReset);
+          } catch (error) {
+            // Handle errors, e.g., display an error message
+            console.error('Error deleting comment:', error);
+            dispatch(setMessage({ code: 500, message: 'Server error' }));
+            dispatch(closeMessage());
+          }
+        };
     
       const columns = [
         {

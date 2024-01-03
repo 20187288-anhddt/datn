@@ -9,7 +9,10 @@ export const hanldeUrlPretty = (url) => {
   url = url.replace(/đ/g, "d");
   url = url.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, "");
   url = url.replace(/\u02C6|\u0306|\u031B/g, "");
-
+  url = url.replace(/%/g, "");
+  url = url.replace(/'/g, "");
+  url = url.replace(/,/g, "");
+  url = url.replace(/:/g, "");
   const hanldeUrl = url.split(" ");
 
   const rs = hanldeUrl.join("-");

@@ -89,35 +89,50 @@ export default function NewsDetail(props) {
 
   const handleDelete = async (commentId) => {
     try {
-      const res = await axios.get(`/comments`, {
-        params: { commentId: commentId, newsId: props.datas._id },
+      const res = await axios.delete(`/comments/${commentId}`, {
+        params: { newsId: props.datas._id },
       });
-
+  
       const { code, message, data } = res.data;
-
+  
       dispatch(setMessage({ code, message }));
       dispatch(closeMessage({ code, message }));
-
+  
       setComments(data);
     } catch (e) {
-      console.log(e);
+      console.error('Error deleting comment:', e);
     }
   };
+  
 
   return (
     <React.Fragment>
       <Message />
       {datas ? (
         <div className="col-xl-9 col-lg-9 col-sm-12 p-2 bg-white rounded shadow-sm">
-          <h1>{datas.title}</h1>
-          {datas.createdBy ? (
-            <p className="featured-new__createby text-secondary">
-              <i className="mdi mdi-monitor" /> {datas.createdBy.username} -{" "}
-              <i className="mdi mdi-av-timer" />{" "}
-              {moment(datas.dateCreate).format("DD-MM-YYYY")} -{" "}
-              <i className="mdi mdi-eye" /> {datas.view}
-            </p>
-          ) : null}
+      <h1>{datas.title}</h1>
+      {datas.createdBy ? (
+  <div className="featured-new__createby text-secondary">
+    <div className="share-info">
+      <i className="mdi mdi-monitor" /> {datas.createdBy.username} -{" "}
+      <i className="mdi mdi-av-timer" />{" "}
+      {moment(datas.dateCreate).format("HH:mm:ss DD-MM-YYYY")} -{" "}
+      <i className="mdi mdi-eye" /> {datas.view}
+    </div>
+    <div className="share-button">
+      <iframe
+        src={`https://www.facebook.com/plugins/share_button.php?href=https://ddtienanh.fun/details/${datas._id}&layout=button_count`}
+        width="86"
+        height="20"
+        style={{ border: "none", overflow: "hidden" }}
+        scrolling="no"
+        frameBorder="0"
+        allowFullScreen={true}
+        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+      ></iframe>
+    </div>
+  </div>
+) : null}
           {datas.articlePicture ? (
             <div
               className="border border-secondary my-4"
@@ -187,9 +202,17 @@ export default function NewsDetail(props) {
                         alt={comment.createdBy.image}
                       />
                     </div>
-                    <div className="font-weight-bold ml-1">
-                      {comment.createdBy.username}
-                    </div>
+                    <div>
+                        {comment.createdBy.username ? (
+                        <div className="font-weight-bold ml-1">
+                          {comment.createdBy.username}
+                        </div>
+                      ) : (
+                        <div className="font-weight-bold ml-1">
+                          {comment.createdBy.email}
+                        </div>
+                      )}
+                       </div>
                   </div>
                   <p className="my-2">{comment.content}</p>
                   <small>

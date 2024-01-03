@@ -3,7 +3,11 @@ import moment from "moment";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import ViewsByDayStatisticals from "./statisticals/ViewsByDayStatisticals";
+import NewsByMonthStatisticals from "./statisticals/NewsByMonthStatisticals";
 import ViewsByMonthStatisticals from "./statisticals/ViewsByMonthStatisticals";
+import TopMostViews from "./statisticals/TopMostViews";
+import ArticleCountByCategory from "./statisticals/articleCountByCategory";
+import ArticleCountBySource from "./statisticals/ArticleCountBySource";
 
 export default function Dashboard() {
   const [month, setMonth] = React.useState("");
@@ -31,6 +35,8 @@ export default function Dashboard() {
           <ViewsByDayStatisticals/>
         </div>
       </div>
+
+      
       <div className="row" style={{ padding: "0px 30px 30px 30px" }}>
         <div style={{ alignItems: "center", marginBottom:"20px" }} className="col-xl-12 grid-margin stretch-card font-weight-bold">
           <div style={{display:"inline-block", minWidth:"200px", marginLeft:"20px"}}>
@@ -48,6 +54,49 @@ export default function Dashboard() {
           <ViewsByMonthStatisticals month={month} />
         </div>
       </div>
+
+      <div className="row" style={{ padding: "0px 30px 30px 30px" }}>
+        <div style={{ alignItems: "center", marginBottom:"20px" }} className="col-xl-12 grid-margin stretch-card font-weight-bold">
+          <div style={{display:"inline-block", minWidth:"200px", marginLeft:"20px"}}>
+            Số lượng bài báo theo ngày: 
+          </div>
+          <DatePicker
+            selected={startDate}
+            onChange={date => handleChangeMonth(date)}
+            dateFormat="yyyy/MM"
+            showMonthYearPicker
+            className="border border-white rounded-pill ml-1 p-1"
+          />
+        </div>
+        <div className="col-xl-12 grid-margin stretch-card" >
+          <NewsByMonthStatisticals month={month} />
+        </div>
+      </div>
+
+
+
+      <div>
+      <div className="row" style={{ padding: "0px 30px 30px 30px" }}>
+        <div className="col-md-6" style={{ maxHeight: "400px",  }}>
+          <div className="font-weight-bold">Thống kê số lượng bài viết theo thể loại:</div>
+          <ArticleCountByCategory />
+        </div>
+        <div className="col-md-6" style={{ maxHeight: "400px",  }}>
+          <div className="font-weight-bold">Thống kê số lượng bài viết theo nguồn:</div>
+          <ArticleCountBySource />
+        </div>
+      </div>
+    </div>
+
+      <div className="row" style={{ padding: "0px 30px 30px 30px",marginTop: "30px" }}>
+        <div className="col-xl-12 font-weight-bold">Top bài viết được xem nhiều nhất:</div>
+        <div className="col-xl-12 grid-margin stretch-card" >
+          <TopMostViews/>
+        </div>
+      </div>
+
+
+
     </div>
   );
 }

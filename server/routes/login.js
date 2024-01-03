@@ -10,6 +10,7 @@ const UserModel = require("../models/User");
 const path = require("path");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const sizeOf = require('image-size');
 
 const key = {
   tokenKey: "djghhhhuuwiwuewieuwieuriwu_cus",

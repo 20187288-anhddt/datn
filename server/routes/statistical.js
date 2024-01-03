@@ -162,6 +162,46 @@ router.get("/viewsOfMonth", async (req, res) => {
 });
 
 
+router.get("/newsByMonth", async (req, res) => {
+  try {
+    const month = req.query.month;
+
+    // Determine the start and end of the selected month
+    const startMonth = new Date(
+      moment(month).startOf("month").format("YYYY-MM-DD")
+    );
+
+    const endMonth = new Date(
+      moment(startMonth).endOf("month").format("YYYY-MM-DD")
+    );
+
+    // Fetch news articles within the specified month, sorted by view count
+    const newsByMonth = await NewsModel.find({
+      isDelete: false,
+      date: {
+        $gte: startMonth,
+        $lte: endMonth,
+      },
+    })
+      .sort({ view: -1 })
+      .populate("createdBy");
+
+    return res.status(200).json({
+      code: 200,
+      message: "Successfully retrieved published news articles for the month",
+      data: newsByMonth,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      code: 500,
+      message: "Error occurred while fetching published news articles for the month",
+      error: err.message || "Unknown error",
+      data: null,
+    });
+  }
+});
+
 router.get('/postOfDay', async (req, res) => {
   try {
     // Truy vấn để đếm số lượng ngày tạo là hôm nay
@@ -390,20 +430,60 @@ router.get("/articleCountByAuthor", async (req, res) => {
   }
 });
 
+// router.get("/articleCountBySource", async (req, res) => {
+//   try {
+//     // Get start and end dates from the request query parameters
+//     const startDate = new Date(req.query.startDate);
+//     const endDate = new Date(req.query.endDate);
+
+//     const articleCountBySource = await NewsModel.aggregate([
+//       {
+//         $match: {
+//           isDelete: false,
+//           dateCreate: {
+//             $gte: startDate,
+//             $lte: endDate,
+//           },
+//         },
+//       },
+//       {
+//         $group: {
+//           _id: "$source",
+//           count: { $sum: 1 },
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 0,
+//           source: "$_id",
+//           count: 1,
+//         },
+//       },
+//     ]);
+
+//     res.status(200).json({
+//       code: 200,
+//       message: "Lấy số lượng bài viết theo nguồn thành công",
+//       data: articleCountBySource,
+//     });
+//   } catch (error) {
+//     console.error(error);
+
+//     res.status(500).json({
+//       code: 500,
+//       message: "Đã xảy ra lỗi khi lấy số lượng bài viết theo nguồn",
+//       error: error.message || "Lỗi không xác định",
+//       data: null,
+//     });
+//   }
+// });
+
 router.get("/articleCountBySource", async (req, res) => {
   try {
-    // Get start and end dates from the request query parameters
-    const startDate = new Date(req.query.startDate);
-    const endDate = new Date(req.query.endDate);
-
     const articleCountBySource = await NewsModel.aggregate([
       {
         $match: {
           isDelete: false,
-          dateCreate: {
-            $gte: startDate,
-            $lte: endDate,
-          },
         },
       },
       {
@@ -438,16 +518,17 @@ router.get("/articleCountBySource", async (req, res) => {
   }
 });
 
+
 router.get("/topMostViewed", async (req, res) => {
   try {
     const topMostViewed = await NewsModel
       .find({ isDelete: false }) // Exclude deleted articles
       .sort({ view: -1 }) // Sort by view count in descending order
-      .limit(20) // Limit the result to the top 10 articles
+      .limit(100) // Limit the result to the top 10 articles
 
     res.status(200).json({
       code: 200,
-      message: "Lấy danh sách 20 bài viết có lượt xem cao nhất thành công",
+      message: "Lấy danh sách bài viết có lượt xem cao nhất thành công",
       data: topMostViewed,
     });
   } catch (error) {
@@ -455,7 +536,7 @@ router.get("/topMostViewed", async (req, res) => {
 
     res.status(500).json({
       code: 500,
-      message: "Đã xảy ra lỗi khi lấy danh sách 20 bài viết có lượt xem cao nhất",
+      message: "Đã xảy ra lỗi khi lấy danh sách bài viết có lượt xem cao nhất",
       error: error.message || "Lỗi không xác định",
       data: null,
     });

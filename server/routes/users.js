@@ -1,4 +1,6 @@
 var express = require("express");
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 const authenticateToken = require("../utils/authenticateToken");
 
 var router = express.Router();
@@ -145,41 +147,48 @@ router.put(
   }
 );
 
-// delete user
-router.delete(
-  "/:id",
-  // authenticateToken,
-  // isAdmin,
-  async function (req, res, next) {
-    const userId = req.params.id;
-    const userExist = UserModel.findOne({ _id: userId });
-    try {
-      if (userExist) {
-        const userDelete = await UserModel.deleteOne({ _id: userId });
-        const users = await UserModel.find({}).populate("createdBy");
+router.post("/delete/:id", async function(req, res, next) {
+  const userId = req.params.id;
 
-        if (userDelete) {
-          res.json({
-            code: 200,
-            message: "Xóa tài khoản thành công",
-            data: users,
-          });
-        }
-      } else {
-        res.status(404).json({
-          code: 404,
-          message: "Người dùng không tồn tại",
-        });
-      }
-    } catch (err) {
-      res.json({
+  try {
+    const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
+    if (!isValidObjectId) {
+      return res.status(400).json({
         code: 400,
-        message: "Xóa tài khoản thất bại",
+        message: "Invalid user ID format",
         data: null,
       });
     }
+
+    const userDelete = await UserModel.deleteOne({ _id: new ObjectId(userId) });
+
+    if (userDelete.deletedCount > 0) {
+      // Xử lý khi xóa thành công và trả về phản hồi
+      const users = await UserModel.find({});
+      res.json({
+        code: 200,
+        message: "Xóa tài khoản thành công",
+        data: users,
+      });
+    } else {
+      // Xử lý khi không xóa được và trả về phản hồi
+      res.status(404).json({
+        code: 404,
+        message: "Không tìm thấy tài khoản để xóa",
+        data: null,
+      });
+    }
+  } catch (err) {
+    // Xử lý lỗi và trả về phản hồi lỗi
+    console.error(err);
+    res.status(500).json({
+      code: 500,
+      message: "Lỗi nội bộ máy chủ",
+      data: null,
+    });
   }
-);
+});
+
 
 // get user by id
 router.get("/name/:id", async (req, res, next) => {

@@ -756,4 +756,18 @@ img {
   cursor: pointer;
   transition: 0.3s;
 }
+
+.featured-new__createby {
+  display: flex;
+  justify-content: space-between;
+}
+
+.share-info {
+  float: left;
+}
+
+.share-button {
+  float: right;
+}
+
 /*# sourceMappingURL=App.css.map */

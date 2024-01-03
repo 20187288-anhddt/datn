@@ -58,13 +58,14 @@ export default function Member() {
     const userExist = users.find(item => item._id === id);
     if (!userExist)
       return
-    const res = await axios.delete(`/users/${id}`);
+    const res = await axios.post(`/users/delete/${id}`);
     const { code, message, data } = res.data;
     setUsers(data);
     setUsersData(data);
     dispatch(setMessage({ code, message }));
     dispatch(closeMessage());
-  }
+
+  };
 
   // filter ROLE
   const hanldeFilterRole = (e) => {
@@ -132,8 +133,8 @@ export default function Member() {
                 >
                   <option value="admin">Admin</option>
                   <option value="customer">Customer</option>
-                  <option value="customer">Journalist</option>
-                  <option value="customer">Editor</option>
+                  <option value="journalist">Journalist</option>
+                  <option value="editor">Editor</option>
                 </select>
               </span>
               {props.original.isDelete ? (
@@ -175,13 +176,13 @@ export default function Member() {
               )}
             </button>
             <button
-              type="button"
-              className="btn btn-danger btn-sm"
-              title="Xóa tài khoản"
-              onClick={handleDeleteUser}
-            >
-              <i className="mdi mdi-account-remove"></i>
-            </button>
+                type="button"
+                className="btn btn-danger btn-sm"
+                title="Xóa tài khoản"
+                onClick={() => handleDeleteUser(props.original._id)}
+              >
+                <i className="mdi mdi-account-remove"></i>
+              </button>
           </div>
         );
       }
@@ -205,6 +206,8 @@ export default function Member() {
               <option value="all">All</option>
               <option value="admin">Admin</option>
               <option value="customer">Customer</option>
+              <option value="journalist">Journalist</option>
+              <option value="editor">Editor</option>
             </select>
           </div>
         </div>

@@ -123,36 +123,58 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.delete("/", async function (req, res, next) {
+router.delete("/:id", async function (req, res, next) {
   try {
-    const _id = req.query.commentId;
+    const _id = req.params.id; // Use req.params.id for parameters in the path
     const newsId = req.query.newsId;
-    console.log(newsId);
+
+    console.log(_id);
     const commentExist = await CommentModel.findOne({ _id: _id });
 
     if (commentExist) {
       const commentDelete = await CommentModel.findOneAndDelete({ _id: _id });
-      const CommentsOfNews = await CommentModel.find({ news: newsId })
-        .limit(5)
-        .sort({ date: -1 })
-        .populate("createdBy");
 
-      if (commentDelete) {
+      if (commentDelete !== null) {
+        const CommentsOfNews = await CommentModel.find({ news: newsId })
+          .limit(5)
+          .sort({ date: -1 })
+          .populate("createdBy");
+
+        if (CommentsOfNews) {
+          res.json({
+            code: 200,
+            message: "Xóa thành công",
+            data: CommentsOfNews,
+          });
+        } else {
+          res.json({
+            code: 200,
+            message: "Xóa thành công, không có bình luận nào khác",
+            data: [],
+          });
+        }
+      } else {
         res.json({
-          code: 200,
-          message: "Xóa thành công",
-          data: CommentsOfNews,
+          code: 400,
+          message: "Không thể xóa bình luận",
         });
       }
+    } else {
+      res.json({
+        code: 400,
+        message: "Bình luận không tồn tại",
+      });
     }
   } catch (err) {
+    console.error("Lỗi khi xóa bình luận:", err);
     return res.json({
-      code: 400,
-      message: "Xóa thất bại",
+      code: 500,
+      message: "Lỗi máy chủ",
       err: err,
     });
   }
 });
+
 
 router.put("/prohibitedWords", async (req, res) => {
   try {
