@@ -4,6 +4,8 @@ import Message from "./components/Message";
 
 export default function WithAuth(...args) {
   const ComponentAdmin = args[0];
+  const ComponentJournalist = args[2];
+  const ComponentEditor = args[1];
 
   const [role, setRole] = React.useState("asdasd");
   const msg = "Unauthorized: Bạn không được cấp phép vào trang này.";
@@ -19,18 +21,18 @@ export default function WithAuth(...args) {
 
         setRole(userRole);
 
-        // if (userRole) {
-        //   const checkToken = async () => {
-        //     const res = await axios.post("/login/checkToken", {
-        //       token: token,
-        //       role: userRole
-        //     });
+        if (userRole) {
+          const checkToken = async () => {
+            const res = await axios.post("/login/checkToken", {
+              token: token,
+              role: userRole
+            });
 
-        //     setRole(res.data.role);
-        //   };
+            setRole(res.data.role);
+          };
 
-        //   checkToken();
-        // }
+          checkToken();
+        }
       } else {
         setRole(null);
       }
@@ -42,8 +44,12 @@ export default function WithAuth(...args) {
   return (
     <React.Fragment>
       {role ? (
-         role === "admin" ? (
+        role === "admin" ? (
           <ComponentAdmin />
+        ) : role === "journalist" ? (
+          <ComponentJournalist />
+        ) : role === "editor" ? (
+          <ComponentEditor />
         ) : role === "customer" || role === "not login" || role === "" || role === null ? (
           <Message message={msg} />
         ) : null

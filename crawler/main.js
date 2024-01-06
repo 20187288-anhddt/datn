@@ -92,10 +92,10 @@ class ArticalCrawler {
 
   crawl() {
     // Queue just one URL, with default callback
-    this.crawler.queue("https://znews.vn/");
-    this.crawler.queue("https://suckhoedoisong.vn/");
-    this.crawler.queue("https://baotintuc.vn/");
-    this.crawler.queue("https://tienphong.vn/");
+    this.crawler.queue("https://znews.vn");
+    this.crawler.queue("https://suckhoedoisong.vn");
+    this.crawler.queue("https://baotintuc.vn");
+    this.crawler.queue("https://tienphong.vn");
   }
 }
 

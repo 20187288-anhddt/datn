@@ -76,11 +76,12 @@ export default function NewsOther() {
                   
                 </p>
                 {item.sapo && (
-                    <span className="mx-auto">
-                      {" "}
-                    {item.sapo}
-                    </span>
-                  )}
+                  <span className="mx-auto">
+                    {item.sapo.length > 180
+                      ? `${item.sapo.substring(0, 200)}...`
+                      : item.sapo}
+                  </span>
+                )}
               </div>
             </Link>
           ))
@@ -88,10 +89,15 @@ export default function NewsOther() {
           <BoxLoadingItem />
         )}
         <div className="text-center">
-          <button className="btn btn-light text-dark" onClick={hanldeLoadMore}>
+          <button className="btn btn-light text-dark border" onClick={hanldeLoadMore}>
             Xem thêm{" "}
             {loading ? <i className="mdi mdi-loading mdi-spin" /> : null}
           </button>
+
+          {/* <button className="btn btn-light text-dark font-weight-bold border">
+  Xem thêm {loading ? <i className="mdi mdi-loading mdi-spin" /> : null}
+</button> */}
+
         </div>
       </div>
     </React.Fragment>

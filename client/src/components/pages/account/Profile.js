@@ -107,22 +107,23 @@ export default function Profile() {
   };
 
   // Password
-  const hanldeChangePassword = e => {
+  const handleChangePassword = e => {
     setUserPassword({ ...userPassword, [e.target.name]: e.target.value });
   };
-
-  const hanldeUpdatePassword = async e => {
+  
+  const handleUpdatePassword = async () => {
     if (
       !userPassword.currentPassword ||
       !userPassword.newPassword ||
       !userPassword.newPasswordAgain
     ) {
-
-      setUserCurrentPasswordErr(mer);
-      setUserNewPasswordErr(mer);
-      setUserNewPasswordAgainErr(mer);
+      // Set error messages for missing passwords
+      setUserCurrentPasswordErr("Mật khẩu không được bỏ trống");
+      setUserNewPasswordErr("Mật khẩu mới không được bỏ trống");
+      setUserNewPasswordAgainErr("Nhập lại mật khẩu mới không được bỏ trống");
     } else {
       if (userPassword.newPassword !== userPassword.newPasswordAgain) {
+        // Set error message for non-matching passwords
         setUserPasswordErr("Mật khẩu không trùng khớp");
       } else {
         try {
@@ -130,20 +131,24 @@ export default function Profile() {
             newPassword: userPassword.newPassword,
             currentPassword: userPassword.currentPassword
           });
-          const { code, message } = res.data;
-
+  
+          const { code, message, data } = res.data;
+  
           dispatch(setMessage({ code, message }));
           dispatch(closeMessage());
   
           if (code === 200) {
-            const { username, email, role, image, _id } = res.data.data;
+            const { username, email, role, image, _id } = data;
   
             dispatch(addUser({ username, email, role, image, _id }));
           }
-
+  
+          // Clear password error after a successful update
           setUserPasswordErr("");
         } catch (error) {
-          console.log(error);
+          console.error("Error updating password:", error);
+          // Handle error and display appropriate message to the user
+          setUserPasswordErr("Có lỗi xảy ra khi cập nhật mật khẩu. Vui lòng thử lại.");
         }
       }
     }
@@ -242,7 +247,7 @@ export default function Profile() {
                       <h5>Nhập mật khẩu hiện tại</h5>
                     </label>
                     <input
-                      onChange={hanldeChangePassword}
+                      onChange={handleChangePassword}
                       value={userPassword.currentPassword || ""}
                       type="password"
                       className="form-control"
@@ -265,7 +270,7 @@ export default function Profile() {
                       <h5>Nhập mật khẩu mới</h5>
                     </label>
                     <input
-                      onChange={hanldeChangePassword}
+                      onChange={handleChangePassword}
                       value={userPassword.newPassword || ""}
                       type="password"
                       className="form-control"
@@ -285,7 +290,7 @@ export default function Profile() {
                       <h5>Nhập lại mật khẩu mới</h5>
                     </label>
                     <input
-                      onChange={hanldeChangePassword}
+                      onChange={handleChangePassword}
                       value={userPassword.newPasswordAgain || ""}
                       type="password"
                       className="form-control"
@@ -297,7 +302,7 @@ export default function Profile() {
                 <div className="form-group">
                   <div className="col-xs-12">
                     <button
-                      onClick={hanldeUpdatePassword}
+                      onClick={handleUpdatePassword}
                       className="btn btn-danger btn-sm"
                       type="submit"
                     >

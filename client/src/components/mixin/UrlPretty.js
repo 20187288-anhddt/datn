@@ -13,6 +13,8 @@ export const hanldeUrlPretty = (url) => {
   url = url.replace(/'/g, "");
   url = url.replace(/,/g, "");
   url = url.replace(/:/g, "");
+  url = url.replace(/\?/g, "");
+  url = url.replace(/"/g, "");
   const hanldeUrl = url.split(" ");
 
   const rs = hanldeUrl.join("-");

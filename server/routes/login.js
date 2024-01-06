@@ -10,8 +10,8 @@ const UserModel = require("../models/User");
 const path = require("path");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
-const sizeOf = require('image-size');
-
+const sizeOf = require("image-size")
+const mime = require('mime-types');
 const key = {
   tokenKey: "djghhhhuuwiwuewieuwieuriwu_cus",
 };
@@ -319,7 +319,7 @@ async (req, res) => {
     }
 
     // Kiểm tra email mới có hợp lệ không
-    const newEmail = req.body.newEmail;
+    const newEmail = req.body.email;
 
     if (!validInput.checkEmail(newEmail)) {
       return res.status(400).json({
@@ -356,7 +356,7 @@ router.put("/updatePassword/:id",
 async (req, res) => {
   try {
     // Kiểm tra dữ liệu đầu vào
-    const { currentPassword, newPassword } = req.params;
+    const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
         code: 400,
@@ -374,8 +374,9 @@ async (req, res) => {
       currentPassword,
       userExist.password
     );
+    console.log(currentPassword);
     if (comparePassword) {
-      if (!validInput.checkUserPassword(newPassword)) {
+      if (validInput.checkUserPassword(currentPassword)) {
         return callRes(
           res,
           responseCode.PARAMETER_VALUE_IS_INVALID,
@@ -418,73 +419,95 @@ async (req, res) => {
   }
 });
 
-router.put("/uploadAvatar/:id", 
-// authenticateToken,
- async (req, res) => {
+router.put("/uploadAvatar/:id", async (req, res) => {
   try {
     const userExist = await UserModel.findOne({ _id: req.params.id });
-
-    if (userExist) {
-      const file = req.files && req.files.file;
-
-      if (file) {
-        const uploadPath = path.join(
-          __dirname,
-          "/public/uploads/users/",
-          file.name
-        );
-
-        // Kiểm tra kích thước tập tin
-        const fileSizeInBytes = file.size;
-        const maxSizeInBytes = 1024 * 1024; // 1MB
-
-        if (fileSizeInBytes > maxSizeInBytes) {
-          return res.status(400).json({
-            code: 400,
-            message: "Kích thước tập tin vượt quá giới hạn 1MB",
-          });
-        }
-
-        // Kiểm tra định dạng tập tin
-        const dimensions = sizeOf(file.tempFilePath);
-        const acceptedFormats = ["jpeg", "png", "gif", "jpg"];
-
-        if (!acceptedFormats.includes(dimensions.type.toLowerCase())) {
-          return res.status(400).json({
-            code: 400,
-            message: "Tập tin không phải là hình ảnh hợp lệ",
-          });
-        }
-
-        file.mv(uploadPath);
-
-        const user = {
-          image: file.name,
-        };
-
-        const updateUserAvatar = await UserModel.findOneAndUpdate(
-          { _id: req.params.id },
-          user,
-          {
-            new: true,
-            useFindAndModify: false,
-          }
-        );
-
-        if (updateUserAvatar) {
-          return res.status(200).json({
-            data: updateUserAvatar,
-            code: 200,
-            message: "Thay đổi avatar thành công",
-          });
-        }
-      }
+    
+    if (!userExist) {
+      return res.status(404).json({
+        code: 404,
+        message: "Người dùng không tồn tại",
+      });
     }
 
-    return res.status(404).json({
-      code: 404,
-      message: "Người dùng không tồn tại",
+    const file = req.files && req.files.file;
+
+    if (!file) {
+      return res.status(400).json({
+        code: 400,
+        message: "Không có file được tải lên",
+      });
+    }
+    // Tạo chuỗi ngày tháng
+    const currentDate = new Date();
+const dateString = currentDate.toISOString().replace(/[-T:.Z]/g, '');
+    const newFileName = `${dateString}${path.extname(file.name)}`;
+    const uploadPath = path.join(
+      __dirname,
+      "../../client/public/uploads/users/",
+      newFileName
+    );
+
+    // Kiểm tra kích thước tập tin
+    const fileSizeInBytes = file.size;
+    const maxSizeInBytes = 1024 * 1024; // 1MB
+
+    if (fileSizeInBytes > maxSizeInBytes) {
+      return res.status(400).json({
+        code: 400,
+        message: "Kích thước tập tin vượt quá giới hạn 1MB",
+      });
+    }
+    const acceptedFormats = ["jpeg", "png", "gif", "jpg"];
+// Kiểm tra định dạng tập tin
+const fileData = Uint8Array.from(file.data);  // Chuyển đổi dữ liệu từ Buffer thành Uint8Array
+const mimeType = mime.lookup(file.name);
+
+if (!mimeType || !acceptedFormats.includes(mimeType.split('/')[1])) {
+  return res.status(400).json({
+    code: 400,
+    message: "Tập tin không phải là hình ảnh hợp lệ",
+  });
+}
+
+const dimensions = sizeOf(fileData);
+
+if (!acceptedFormats.includes(dimensions.type.toLowerCase())) {
+  return res.status(400).json({
+    code: 400,
+    message: "Tập tin không phải là hình ảnh hợp lệ",
+  });
+}
+
+
+
+    // Di chuyển tập tin đến địa chỉ đích
+    await file.mv(uploadPath);
+
+    // Cập nhật thông tin người dùng
+    const updateUserAvatar = await UserModel.findOneAndUpdate(
+      { _id: req.params.id },
+      { image: newFileName},
+      {
+        new: true,
+        useFindAndModify: false,
+      }
+    );
+
+    if (!updateUserAvatar) {
+      return res.status(500).json({
+        code: 500,
+        message: "Cập nhật thông tin người dùng thất bại",
+      });
+    }
+
+    // Trả về kết quả thành công
+    return res.status(200).json({
+      data: updateUserAvatar,
+      code: 200,
+      message: "Thay đổi avatar thành công",
     });
+
   } catch (error) {
     console.error("Error during avatar upload:", error);
     return res.status(500).json({
@@ -493,7 +516,6 @@ router.put("/uploadAvatar/:id",
     });
   }
 });
-
 router.post("/checkToken", (req, res) => {
   const token = req.body.token;
   const role = req.body.role;

@@ -19,8 +19,6 @@ export default function AddNews() {
   const [subCategories, setSubCategories] = useState([]);
   const [categories, setCategories] = useState([]);
 
-  
-
   const { register, handleSubmit, errors } = useForm();
   const appState = useSelector((state) => state);
   const dispatch = useDispatch();
@@ -44,7 +42,6 @@ export default function AddNews() {
       const data = res.data.data;
       setCategories(data);
     };
-
     fetchCategories();
   }, []);
 
@@ -59,8 +56,6 @@ export default function AddNews() {
 
     fetchSubCategories();
   }, [selectedCategory]);
-
-
 
   const hanldChangeTag = (e) => {
     setTag(e.target.value);
@@ -92,7 +87,9 @@ export default function AddNews() {
   };
 
   const hanldeChangeUpload = (e) => {
-    setFile(e.target.files[0]);
+    e.preventDefault(); // Prevent default form submission behavior
+  
+    setFile(e.target.files[0]); // Use e.target.files[0] to get the first selected file
   };
 
   const onSunmit = async (data) => {
@@ -110,7 +107,7 @@ export default function AddNews() {
       formData.append("sapo", data.sapo || "");
       formData.append("originalLink", data.originalLink || "");
 
-      const res = await axios.post("/news", formData);
+      const res = await axios.post("/news/", formData);
       const { code, message } = res.data;
 
       dispatch(setMessage({ code, message }));
@@ -203,7 +200,7 @@ export default function AddNews() {
                 name="subCategory"
                 className="form-control"
                 style={{ border: `${errors.subCategory ? "1px solid red" : ""}` }}
-                ref={register({ required: true })}
+                ref={register({ required: false })}
               >
                 {subCategories.map((subCategory, index) => (
                   <option key={index} value={subCategory._id}>

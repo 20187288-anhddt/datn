@@ -18,6 +18,18 @@ const schema = new Schema({
   subCateNews : { type: ObjectId, ref: "subCateNews" },
   createdBy: { type: ObjectId, ref: "User" },
   articlePicture: { type: String },
+  countLike: {
+    type: Number,
+    default: 0
+  },
+  ratingCount: {
+    type: Number,
+    default: 0
+  },
+  avengeRating: {
+    type: mongoose.Schema.Types.Double,
+    default: 0
+  },
   view: {
     type: Number,
     default: 0

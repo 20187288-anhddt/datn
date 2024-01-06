@@ -16,6 +16,7 @@ export default function EditNews({ match }) {
   const [categories, setCategories] = React.useState([]);
   const [newData, setNewData] = React.useState([]);
   const [news, setNews] = React.useState({ tag: "" });
+  const [loading, setLoading] = React.useState(false);
 
   const dispatch = useDispatch();
 
@@ -40,9 +41,8 @@ export default function EditNews({ match }) {
     fetchNew();
   }, [dispatch, match.params.id]);
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     setNews({ ...news, [e.target.name]: e.target.value });
-
   };
 
   const hanldAddTag = () => {
@@ -50,7 +50,7 @@ export default function EditNews({ match }) {
       setTagAlready("Bạn cần nhập tag");
     } else {
       if (tags) {
-        const tagExist = tags.filter(v => v.toLowerCase() === news.tag.toLowerCase());
+        const tagExist = tags.filter((v) => v.toLowerCase() === news.tag.toLowerCase());
 
         if (tagExist.length > 0) {
           setTagAlready("Tag đã tồn tại");
@@ -62,7 +62,6 @@ export default function EditNews({ match }) {
     }
   };
 
-  // remove tag
   const hanldeRemoveTag = (index) => {
     const newTag = [...tags];
     newTag.splice(index, 1);
@@ -70,33 +69,40 @@ export default function EditNews({ match }) {
     setTags(newTag);
   };
 
-  const hanldChangeContent = content => {
+  const hanldChangeContent = (content) => {
     setContent(content);
   };
 
-  const hanldeChangeUpload = e => {
+  const hanldeChangeUpload = (e) => {
     setFile(e.target.files[0]);
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
+    setLoading(true);
 
-    formData.append('title', news.title || newData.title);
-    formData.append('cateNews', news.category || newData.cateNews._id);
-    formData.append('content', content || newData.content);
-    formData.append('tags', JSON.stringify(tags));
+    const formData = new FormData();
+    formData.append("title", news.title || newData.title);
+    formData.append("cateNews", news.category || newData.cateNews._id);
+    formData.append("content", content || newData.content);
+    formData.append("tags", JSON.stringify(tags));
     formData.append("file", file || newData.articlePicture);
     formData.append("status", news.status || newData.status);
     formData.append("sapo", news.sapo || newData.sapo || "");
     formData.append("originalLink", news.originalLink || newData.originalLink || "");
 
+    try {
+      const res = await axios.put(`/news/${match.params.id}`, formData);
+      const { code, message } = res.data;
 
-    const res = await axios.put(`/news/${match.params.id}`, formData);
-    const { code, message } = res.data;
-
-    dispatch(setMessage({ code, message }));
-    dispatch(closeMessage());
+      dispatch(setMessage({ code, message }));
+      dispatch(closeMessage());
+    } catch (error) {
+      console.error("Error while updating news:", error);
+      dispatch(setMessage({ code: "error", message: "An error occurred while updating news." }));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -249,6 +255,13 @@ export default function EditNews({ match }) {
             <button type="submit" className="btn btn-danger bety-btn ">
               SỬA
             </button>
+            {loading && (
+              <div className="text-center">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="sr-only">Loading...</span>
+                </div>
+              </div>
+            )}
           </form>
         </div>
       </div>

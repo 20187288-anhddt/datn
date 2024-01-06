@@ -45,7 +45,7 @@ export default function Detail({ match, location }) {
             </div>
             <div className="row">
               <div className="col-lg-8 p-0 main-featured-new">
-                <h3 className="mb-3 mt-3">Tin khác</h3>
+                <h3 className="mb- mt-3">Tin khác</h3>
                 <NewsOther />
               </div>
             </div>

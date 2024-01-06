@@ -8,6 +8,7 @@ import ViewsByMonthStatisticals from "./statisticals/ViewsByMonthStatisticals";
 import TopMostViews from "./statisticals/TopMostViews";
 import ArticleCountByCategory from "./statisticals/articleCountByCategory";
 import ArticleCountBySource from "./statisticals/ArticleCountBySource";
+//import Follow from "./statisticals/Follow";
 
 export default function Dashboard() {
   const [month, setMonth] = React.useState("");
@@ -94,7 +95,12 @@ export default function Dashboard() {
           <TopMostViews/>
         </div>
       </div>
-
+      {/* <div className="row">
+        <div style={{ alignItems: "center" }} className="col-xl-12 grid-margin stretch-card font-weight-bold">Số users theo giỏi kênh:</div>
+        <div className="col-xl-12 grid-margin stretch-card">
+          <Follow />
+        </div>
+      </div> */}
 
 
     </div>

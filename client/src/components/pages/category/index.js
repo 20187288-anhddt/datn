@@ -6,7 +6,7 @@ import HightlightedNews from "./HightlightedNews";
 import OtherNews from "./OtherNews";
 import FeaturedChannel from "../home/FeaturedChannel";
 import LatestNew from "../home/LatestNew";
-
+import KinhDoanhNews from "./KinhDoanhNews";
 export default function Category({ match }) {
 	const [highlightNew, setHighlightNew] = useState({});
 	const [categoryName, setCategoryName] = useState("");
@@ -58,13 +58,20 @@ export default function Category({ match }) {
 							<HightlightedNews news={highlightNew} />
 							{
 								highlightNew
-									? (<OtherNews tags={tags} newsByTag={newByTag} newsHighlightId={highlightNew._id} highlightNew={highlightNew} categoryName={categoryName}/>)
-									: null
+									? 
+									<OtherNews 
+										tags={tags} 
+										newsByTag={newByTag} 
+										newsHighlightId={highlightNew._id} 
+										highlightNew={highlightNew} 
+										categoryName={categoryName}
+										/>
+									: 
+									null
 							}
 						</div>
 						<div className="col-xl-3 col-lg-3 col-sm-12">
 							<div className="mb-4">
-								<LatestNew />
 							</div>
 							<FeaturedChannel />
 						</div>

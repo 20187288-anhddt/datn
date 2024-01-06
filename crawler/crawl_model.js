@@ -12,7 +12,7 @@ class BaseModel{
     init(){}
 
     getHostNameUrl(){
-        return "https://" + this.hostName + "/"
+        return "http://" + this.hostName + "/"
     }
 
     canParse(){
@@ -113,29 +113,32 @@ class BaoTinTucModel extends BaseModel{
         return this.articles
     }
 }
-
-class TienphongModel extends BaseModel{
-    init(){
-        this.hostName = "tienphong.vn"
+class TienphongModel extends BaseModel {
+    init() {
+        this.hostName = "tienphong.vn";
     }
 
-    parse(){
-        const $ = this.res.$
-        const self = this
-        $("article").each((index, element)=>{
-            const element_query =  $(element)
+    parse() {
+        const $ = this.res.$;
+        const self = this;
+
+        $("article").each((index, element) => {
+            const element_query = $(element);
+            const link = element_query.find('a');
+            const title = link.attr("title"); // Corrected line
             const article = {
-                title: element_query.find('a[title]').text().trim(),
-                link: element_query.find('a').attr("href"),
+                link: link.attr("href"),
+                title: title,
                 thumbnail: element_query.find('img').attr("data-src"),
                 sapo: element_query.find(".story__summary").text().trim(),
                 category: element_query.find(".story__meta a").text().trim() || element_query.find(".article-category").text().trim(),
                 source: self.hostName
-            }
-            this.articles.push(article)
-        })
+            };
 
-        return this.articles
+            this.articles.push(article);
+        });
+
+        return this.articles;
     }
 }
 

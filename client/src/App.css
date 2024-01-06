@@ -59,10 +59,20 @@
   object-fit: cover;
 }
 
-.dropdown-menu {
+/* .dropdown-menu {
   margin-top: 0 !important;
+} */
+.dropdown-menu a:hover {
+  color: black !important; /* Màu chữ khi di chuột vào */
+  background-color: #c0c0c0 !important; /* Màu nền khi di chuột vào */
+  text-decoration: none; /* Loại bỏ đường gạch chân khi di chuột vào */
 }
 
+/* Thêm một số hiệu ứng khi di chuột vào */
+.dropdown-menu a:hover {
+  background-color: #e3e3e3; /* Màu nền khi di chuột vào */
+  transition: background-color 0.3s; /* Hiệu ứng chuyển đổi màu nền */
+}
 .custom-file-label {
   padding-right: 5rem !important;
 }
@@ -792,4 +802,31 @@ img {
 .separator {
   margin: 0 5px; /* Adjust the spacing between the separator and items */
 }
+
+.user-info-container {
+  display: flex;
+  align-items: center; /* Align items vertically centered */
+}
+
+.account__avatar {
+  /* Add any styles for the avatar container */
+}
+
+.username {
+  /* Add any styles for the username container */
+  margin-left: 10px; /* Add margin to separate avatar and username */
+}
 /*# sourceMappingURL=App.css.map */
+.nav-divider {
+  margin: 10px 0; /* Khoảng cách giữa dấu gạch ngang và nội dung của nav-item */
+  border: 1px solid #cccccc; /* Kiểu và màu của dấu gạch ngang */
+}
+
+  /* Add this style to slow down the transition */
+  coingecko-coin-price-marquee-widget {
+    transition: transform 1s ease !important; /* Adjust the duration as needed */
+  }
+  .custom-col-lg-5 {
+    flex: 0 0 calc((100% - 20px) / 5.5); 
+    max-width: calc((100% - 20px) / 5.5);
+  }

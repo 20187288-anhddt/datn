@@ -67,14 +67,18 @@ export default function NavAdmin(props) {
                   aria-expanded="false"
                 >
                   {appState.users.data ? (
+                    <div className="user-info-container">
                     <div className="account__avatar">
                       <img
                         style={props.style}
-                        src={`/uploads/users/${appState.users.data.image ||
-                          "avatar-default.jpg"}`}
+                        src={`/uploads/users/${appState.users.data.image || "avatar-default.jpg"}`}
                         alt="avatar"
                       />
                     </div>
+                    <div className="username">
+  <strong style={{ fontWeight: 'bold', fontSize: '16px' }}>{appState.users.data.username}</strong>
+</div>
+                  </div>
                   ) : (
                     "TÀI KHOẢN"
                   )}

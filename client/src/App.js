@@ -27,9 +27,12 @@ const NotFound = React.lazy(() => import("./components/pages/404NotFound"));
 
 // admin
 const Admin = React.lazy(() => import("./components/pages/admin"));
+const Journalist = React.lazy(() => import("./components/pages/journalist"));
+const Editor = React.lazy(() => import("./components/pages/editor"));
 
 // news page
 const Category = React.lazy(() => import("./components/pages/category"));
+const Channel = React.lazy(() => import("./components/pages/channel"));
 const Detail = React.lazy(() => import("./components/pages/detail"));
 
 function App() {
@@ -50,13 +53,14 @@ function App() {
 						<Route path="/contact" component={Contact} />
 						<Route
 							path="/admin"
-							component={() => WithAuth(Admin)}
+							component={() => WithAuth(Admin, Editor,Journalist)}
 						/>
 						<Route path="/login" component={Login} />
 						<Route path="/register" component={Register} />
 						<Route path="/forgot-password" component={ForgotPassword} />
 						<Route path="/profile" component={Profile} />
 						<Route path="/category/*/:id" component={Category} />
+						<Route path="/channel/*/:id" component={Channel} />
 						<Route path="/*/:id" component={Detail} />
 						<Route path="/*" component={NotFound} />
 					</Switch>

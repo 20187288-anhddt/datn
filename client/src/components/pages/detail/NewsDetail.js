@@ -118,6 +118,7 @@ export default function NewsDetail(props) {
       <i className="mdi mdi-av-timer" />{" "}
       {moment(datas.dateCreate).format("HH:mm:ss DD-MM-YYYY")} -{" "}
       <i className="mdi mdi-eye" /> {datas.view}
+
     </div>
     <div className="share-button">
       <iframe
@@ -134,35 +135,53 @@ export default function NewsDetail(props) {
   </div>
 ) : null}
           {datas.articlePicture ? (
-            <div
-              className="border border-secondary my-4"
-              style={{ overflow: "hidden" }}
-            >
-              <img
-                src={
-                  datas.originalLink !== ""
-                    ? datas.articlePicture
-                    : `/uploads/news/${datas.articlePicture}`
-                }
-                alt={datas.title}
-              />
-              {/* <img
-                    src={`/uploads/news/${datas.articlePicture}`}
-                    alt={datas.title}
-                    width="100%"
-                  /> */}
-            </div>
-          ) : (
-            <BoxLoadingDetail />
-          )}
-          <div
-            className="text-justify"
-            dangerouslySetInnerHTML={{ __html: datas.content }}
-          ></div>
+  <>
+    <div className="border border-secondary my-4" style={{ overflow: "hidden" }}>
+
+      <img
+        src={
+          datas.originalLink !== ""
+            ? datas.articlePicture
+            : `/uploads/news/${datas.articlePicture}`
+        }
+        alt={datas.title}
+      />
+      {/* Other content related to the image */}
+      
+    </div>
+    <b style={{ fontSize: "18px" }}>
+  {datas.sapo}
+</b>
+<br />
+<br />
+  </>
+) : (
+  <BoxLoadingDetail />
+)}
+                            
+            <div className="text-justify"  >
+                {datas.content !== null ? (
+                  <div dangerouslySetInnerHTML={{ __html: datas.content }} style={{ fontSize: '50px !important' }}></div>
+                ) : (
+                  <p>Bài viết không có nội dung</p>
+                )}
+              </div>
+              <>   <br/></>
+              <>   <br/></>
+              <div style={{ textAlign: 'right' }}>
+                  <> <br /></>
+                  {datas.source && (
+                    <span className="news-source-title"> Nguồn: {datas.source}</span>
+                  )}
+                  <> <br /></>
+                </div>
+              <>   <br/></>
+              <>   <br/></>
 
           {userId ? (
             <form onSubmit={handleSubmit} className="mt-5">
               <div className="form-group">
+
                 <label htmlFor="exampleFormControlTextarea1">Nhận xét:</label>
                 <textarea
                   name="comment"

@@ -47,12 +47,27 @@ export default function NavUser(props) {
                   <li key={index} className="nav-item">
                     <Link className="nav-link category-link" to={`/category/${item.name && hanldeUrlPretty(item.name)}/${item._id}`}
                     >
-                      {item.name ? <h5><strong>{item.name.toUpperCase()}</strong></h5> : null}
+                      {item.name ? <h4 ><strong>{item.name.toUpperCase()}</strong></h4> : null}
                     </Link>
                   </li>
                 ))
               : null}
           </ul>
+
+          <li className="nav-item dropdown">
+                <button type="button" className="btn btn-sm btn-dark btn-hover-darker" data-toggle="modal" data-target="#exampleModal">
+                  <i className="mdi mdi-magnify mdi-36px !important" />
+                </button>
+                {/* Modal */}
+                <div className="modal fade" id="exampleModal" tabIndex={-1} role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div className="modal-dialog" role="document">
+                    <div className="modal-content">
+                      <Search />
+                    </div>
+                  </div>
+                </div>
+              </li>
+
           <ul className="navbar-nav mr-0" style={{ alignItems: "center" }}>
               <li className="nav-item dropdown">
                 <a
@@ -65,14 +80,18 @@ export default function NavUser(props) {
                   aria-expanded="false"
                 >
                   {appState.users.data ? (
+                    <div className="user-info-container">
                     <div className="account__avatar">
                       <img
                         style={props.style}
-                        src={`/uploads/users/${appState.users.data.image ||
-                          "avatar-default.jpg"}`}
+                        src={`/uploads/users/${appState.users.data.image || "avatar-default.jpg"}`}
                         alt="avatar"
                       />
                     </div>
+                    <div className="username">
+  <strong style={{ fontWeight: 'bold', fontSize: '16px' }}>{appState.users.data.username}</strong>
+</div>
+                  </div>
                   ) : (
                     "TÀI KHOẢN"
                   )}
@@ -112,19 +131,7 @@ export default function NavUser(props) {
                   </div>
                 )}
               </li>
-              <li className="nav-item dropdown">
-                <button type="button" className="btn btn-sm btn-dark" data-toggle="modal" data-target="#exampleModal">
-                  <i className="mdi mdi-magnify" />
-                </button>
-                {/* Modal */}
-                <div className="modal fade" id="exampleModal" tabIndex={-1} role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                  <div className="modal-dialog" role="document">
-                    <div className="modal-content">
-                      <Search />
-                    </div>
-                  </div>
-                </div>
-              </li>
+
           </ul>
         </div>
       </div>

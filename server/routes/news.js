@@ -14,6 +14,13 @@ const request = require("request-promise");
 const axios = require("axios");
 const moment = require("moment");
 const dotenv = require("dotenv");
+const OpenAI = require( "openai");
+
+const openai = new OpenAI({
+  apiKey: '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',
+}
+);
+
 /* GET users listing. */
 
 const app = express();
@@ -76,7 +83,7 @@ router.get("/newsEntertainments", async function (req, res, next) {
   try {
     const newsId = req.query.newsId;
     const News = await NewsModel.find({ status: "published", cateNews: newsId })
-      .limit(6)
+      .limit(9)
       .sort({ view: -1, dateCreate: -1 })
       .populate("createdBy");
 
@@ -216,7 +223,7 @@ router.get("/q", async function (req, res, next) {
 router.get("/latestNews", async function (req, res, next) {
   try {
     const News = await NewsModel.find({ status: "published" })
-      .limit(9)
+      .limit(10)
       .sort({ dateCreate: -1 })
       .populate("createdBy");
 
@@ -233,6 +240,40 @@ router.get("/latestNews", async function (req, res, next) {
     });
   }
 });
+
+// router.get("/newsByAuthor/:source/:createdBy", async function (req, res, next) {
+//   try {
+//     const source = req.params.source;
+//     const createdBy = req.params.createdBy;
+
+//     // Query the database to find articles with the specified source and createdBy
+//     const articles = await NewsModel.find({
+//       source: source,
+//       "createdBy._id": createdBy, // Assuming createdBy is a subdocument within the NewsModel
+//     }).populate("createdBy");
+
+//     if (articles.length === 0) {
+//       return res.json({
+//         code: 200,
+//         err: null,
+//         data: [],
+//       });
+//     }
+
+//     return res.json({
+//       code: 200,
+//       err: null,
+//       data: articles,
+//     });
+//   } catch (err) {
+//     return res.json({
+//       code: 400,
+//       err: err.message,
+//       data: null,
+//     });
+//   }
+// });
+
 // news ( status = "published" )
 router.get("/featuredNews", async function (req, res, next) {
   try {
@@ -533,6 +574,7 @@ router.get("/users/:id", async function (req, res, next) {
   }
 });
 
+
 // tin tức tương tự
 router.get("/similar/:id", async function (req, res, next) {
   try {
@@ -624,6 +666,9 @@ router.get("/details/:_idNews", async function (req, res, next) {
     }
     const newsItem = News[0];
 
+
+
+
     // Kiểm tra xem content có giá trị rỗng hay không
     if (
       newsItem.content.trim() === "" &&
@@ -631,15 +676,45 @@ router.get("/details/:_idNews", async function (req, res, next) {
     ) {
       // Nếu rỗng, thực hiện lấy toàn bộ mã HTML từ URL
       try {
+        let stopCrawl = false;
         const response = await axios.get(newsItem.originalLink);
         const html = response.data;
 
         // Sử dụng cheerio để load mã HTML
         const $ = cheerio.load(html);
+        // $('img').removeAttr('src');
+        // $('img').removeAttr('imgid');
+        // $('img').attr('src', $('img').attr('data-src'));
 
+        // Duyệt qua từng thẻ img và thực hiện thay đổi
+        $('img').each((index, element) => {
+          const $img = $(element);
+
+          // Loại bỏ thuộc tính src và imgid
+          $img.removeAttr('src');
+          $img.removeAttr('imgid');
+          $img.removeAttr('width');
+          $img.removeAttr('height');
+
+          // Thay đổi tên thuộc tính src thành data-src
+          $img.attr('src', $img.attr('data-src'));
+
+          // Loại bỏ thuộc tính data-src
+
+        });
         // Trích xuất nội dung từ phần tử mong muốn (thay bằng phần tử thực tế bạn muốn trích xuất)
-        const extractedContent = $(".the-article-body").html();
-        console.log(extractedContent);
+        // const extractedContent = $(".the-article-body").html();
+        const extractedContent = $(".the-article-body").find('*').filter(function () {
+          if (stopCrawl) {
+            return false;
+        }
+    
+        if ($(this).hasClass('inner-article') || $(this).attr('id') === 'zone-krlv706p') {
+            stopCrawl = true;
+        }
+    
+        return this.type === 'text' || $(this).is('p') || $(this).is('img');
+    });
         // Lưu nội dung vào newsItem.content
         newsItem.content = extractedContent;
         await newsItem.save();
@@ -649,7 +724,8 @@ router.get("/details/:_idNews", async function (req, res, next) {
           {
             $set: {
               title: News.title,
-              content: extractedContent,
+              //content: extractedContent,
+              content : News.content,
               tag: News.tags,
               cateNews: News.cateNews,
               createdBy: News.createdBy,
@@ -666,6 +742,177 @@ router.get("/details/:_idNews", async function (req, res, next) {
         console.error("Error fetching HTML:", error);
       }
     }
+
+    if (
+      newsItem.content.trim() === "" &&
+      newsItem.source.trim() === "tienphong.vn"
+    ) {
+      try {
+        let stopCrawl = false;
+        const response = await axios.get(newsItem.originalLink);
+        const html = response.data;
+        const $ = cheerio.load(html);
+
+        $('img').each((index, element) => {
+          const $img = $(element);
+
+          // Loại bỏ thuộc tính src và imgid
+          // $img.removeAttr('src');
+          $img.removeAttr('imgid');
+          $img.removeAttr('width');
+          $img.removeAttr('height');
+
+          // Thay đổi tên thuộc tính src thành data-src
+          $img.attr('src', $img.attr('data-src'));
+
+          // Loại bỏ thuộc tính data-src
+
+        });
+        // Sử dụng cheerio để load mã HTML
+        const articleBody = $('.article__body.cms-body').find('*').filter(function () {
+          if (stopCrawl) {
+              return false;
+          }
+      
+          if ($(this).hasClass('article__story.cms-relate') || $(this).hasClass('article__author')) {
+              stopCrawl = true;
+          }
+      
+          return this.type === 'text' || $(this).is('p') || $(this).is('img');
+      });
+      
+
+        // Lưu nội dung vào newsItem.content
+        newsItem.content = articleBody;
+        await newsItem.save();
+
+        const newsClass = await NewsModel.findOneAndUpdate(
+          { _id: idNews },
+          {
+            $set: {
+              title: News.title,
+              //content: extractedContent,
+              content : News.content,
+              tag: News.tags,
+              cateNews: News.cateNews,
+              createdBy: News.createdBy,
+              articlePicture: News.articlePicture,
+              originalLink: News.originalLink,
+              dateCreate: News.dateCreate,
+              sapo: News.sapo,
+              source: News.source,
+              status: News.status,
+            },
+          }
+        );
+      } catch (error) {
+        console.error("Error fetching HTML:", error);
+      }
+    }
+
+    if (
+      newsItem.content.trim() === "" &&
+      newsItem.source.trim() === "suckhoedoisong.vn"
+    ) {
+      try {
+
+        let stopCrawl = false;
+        const response = await axios.get(newsItem.originalLink);
+        const html = response.data;
+        // Sử dụng cheerio để load mã HTML
+        const $ = cheerio.load(html);
+        const detailContent = $('.detail-content.afcbc-body').find('*').filter(function () {
+          if (stopCrawl) {
+              return false;
+          }
+      
+          if ($(this).hasClass('detail-author') || $(this).attr('id') === 'zone-krlv706p') {
+              stopCrawl = true;
+          }
+      
+          return this.type === 'text' || $(this).is('p') || $(this).is('img');
+      });
+      
+
+        // Lưu nội dung vào newsItem.content
+        newsItem.content = detailContent;
+        await newsItem.save();
+        const newsClass = await NewsModel.findOneAndUpdate(
+          { _id: idNews },
+          {
+            $set: {
+              title: News.title,
+              //content: extractedContent,
+              content : News.content,
+              tag: News.tags,
+              cateNews: News.cateNews,
+              createdBy: News.createdBy,
+              articlePicture: News.articlePicture,
+              originalLink: News.originalLink,
+              dateCreate: News.dateCreate,
+              sapo: News.sapo,
+              source: News.source,
+              status: News.status,
+            },
+          }
+        );
+      } catch (error) {
+        console.error("Error fetching HTML:", error);
+      }
+    }
+
+    if (
+      newsItem.content.trim() === "" &&
+      newsItem.source.trim() === "baotintuc.vn"
+    ) {
+      try {
+
+        let stopCrawl = false;
+        const response = await axios.get(newsItem.originalLink);
+        const html = response.data;
+        // Sử dụng cheerio để load mã HTML
+        const $ = cheerio.load(html);
+        const detailContent = $('.divfirst').find('*').filter(function () {
+          if (stopCrawl) {
+              return false;
+          }
+      
+          if ($(this).hasClass('detail-author') || $(this).attr('id') === 'zone-krlv706p') {
+              stopCrawl = true;
+          }
+      
+          return this.type === 'text' || $(this).is('p') || $(this).is('img');
+      });
+      
+
+        // Lưu nội dung vào newsItem.content
+        newsItem.content = detailContent;
+        await newsItem.save();
+        const newsClass = await NewsModel.findOneAndUpdate(
+          { _id: idNews },
+          {
+            $set: {
+              title: News.title,
+              //content: extractedContent,
+              content : News.content,
+              tag: News.tags,
+              cateNews: News.cateNews,
+              createdBy: News.createdBy,
+              articlePicture: News.articlePicture,
+              originalLink: News.originalLink,
+              dateCreate: News.dateCreate,
+              sapo: News.sapo,
+              source: News.source,
+              status: News.status,
+            },
+          }
+        );
+      } catch (error) {
+        console.error("Error fetching HTML:", error);
+      }
+    }
+
+    
     const NewsUpdate = await NewsModel.find({
       _id: idNews,
       isDelete: false,
@@ -697,11 +944,13 @@ router.put("/:_id", async function (req, res, next) {
       // Kiểm tra và thực hiện tóm tắt nếu sapo không được truyền
       if (!body.sapo && body.content) {
         // Tóm tắt nội dung với ChatGPT
-        const summarizedContent = await summarizeWithChatGPT(body.content);
-
+        const { summarizedContent, message } = await tomtatWithChatGPT(body.content);
+  
         body.sapo = summarizedContent;
+  
+        // Gán giá trị message vào trường sapo_message nếu cần
+        body.sapo_message = message;
       }
-
       // Tiếp tục với phần còn lại của mã nguồn
 
       if (files && files.file) {
@@ -759,30 +1008,24 @@ router.put("/:_id", async function (req, res, next) {
 });
 
 // Hàm thực hiện tóm tắt với ChatGPT
-async function summarizeWithChatGPT(content) {
-  try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/engines/davinci-codex/completions',
-      {
-        prompt: content,
-        max_tokens: 30,
-        n: 1,
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
-      }
-    );
 
-    const summarizedContent = response.data.choices[0].text.trim();
-    return summarizedContent;
+
+
+async function tomtatWithChatGPT(content) {
+  try {
+    const completion = await openai.chat.completions.create({
+      messages: [{ role: "system", content: "Tóm tắt văn bản sau không quá 30 từ " + content }],
+      model: "gpt-3.5-turbo",
+    });
+
+    const summarizedContent = completion.choices[0].message.content;
+    return { summarizedContent, message: completion.choices[0].message };
   } catch (error) {
     console.error(error);
     throw new Error("Lỗi khi tóm tắt nội dung");
   }
 }
+
 
 
 // add news crawler
@@ -860,74 +1103,46 @@ router.post("/upload", function (req, res, next) {
   }
 });
 
+// add news
+router.post("/", async function (req, res, next) {
+try {
+  const body = req.body;
+  const file = req.files.file;
 
-router.put("/:_id", async function (req, res, next) {
-  try {
-    const _id = req.params._id;
-    const newExist = await NewsModel.findOne({ _id: _id });
-
-    if (newExist) {
-      const body = req.body;
-      const files = req.files;
-
-      // Xác định giá trị của subCateNews từ request body
-      const subCateNews = body.subCateNews || null;
-
-      if (files) {
-        files.file.mv(
-          `${__dirname}/../../client/public/uploads/news/${files.file.name}`
-        );
-
-        const news = {
-          title: body.title,
-          content: body.content,
-          sapo: body.sapo,
-          cateNews: body.cateNews,
-          subCateNews: subCateNews,  // Bổ sung cập nhật subCateNews
-          tag: JSON.parse(body.tags),
-          articlePicture: files.file.name,
-          originalLink: body.originalLink,
-          dateCreate: body.dateCreate,
-          status: body.status,
-        };
-
-        await NewsModel.findOneAndUpdate({ _id: _id }, news);
-
-        return res.json({
-          code: 200,
-          message: "Sửa bài viết thành công",
-        });
-      } else {
-        const news = {
-          title: body.title,
-          content: body.content,
-          sapo: body.sapo,
-          cateNews: body.cateNews,
-          subCateNews: subCateNews,  // Bổ sung cập nhật subCateNews
-          tag: JSON.parse(body.tags),
-          originalLink: body.originalLink,
-          dateCreate: body.dateCreate,
-          status: body.status,
-        };
-
-        await NewsModel.findOneAndUpdate({ _id: _id }, news);
-
-        return res.json({
-          code: 200,
-          message: "Sửa bài viết thành công",
-        });
-      }
-    }
-  } catch (err) {
-    console.log(err);
-    return res.json({
-      code: 400,
-      message: "Sửa bài viết thất bại",
-      err: err,
-      data: null,
-    });
+  if (file) {
+    file.mv(`${__dirname}/../../client/public/uploads/news/${file.name}`);
   }
+  const News = new NewsModel({
+    title: body.title,
+    content: body.content,
+    sapo: body.sapo,
+    content: body.content,
+    cateNews: body.cateNews,
+    tag: JSON.parse(body.tags),
+    createdBy: body.createdBy,
+    articlePicture: file.name,
+    originalLink: body.originalLink,
+    dateCreate: body.dateCreate,
+    status: body.status
+  });
+
+  const NewsClass = await News.save();
+
+  return res.json({
+    code: 200,
+    message: "Gửi yêu cầu thành công",
+    data: NewsClass
+  });
+
+} catch (err) {
+  return res.json({
+    code: 400,
+    err: err,
+    message: "Thêm thất bại"
+  });
+}
 });
+
 
 // increase views
 router.put("/views/:_id", async function (req, res, next) {
@@ -1034,7 +1249,7 @@ router.put("/trash/:_id", async function (req, res, next) {
     if (newExist) {
       const moveToTrash = await NewsModel.findOneAndUpdate(
         { _id: _id },
-        { isDelete: true }
+        { $set: { isDelete: true, status: "unpublished" } },
       );
       const news = await NewsModel.find({}).populate("createdBy");
 

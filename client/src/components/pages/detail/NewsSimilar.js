@@ -28,7 +28,7 @@ export default function NewsSimilar(props) {
           <Link to={`/${hanldeUrlPretty(data.title)}/${data._id}`} key={index} className="other-new p-3 bg-white rounded text-decoration-none">
             <div className="other-new__image border border-secondary">
               <img
-                src={data.content === "" ? data.articlePicture : `/uploads/news/${data.articlePicture}`}
+                src={data.source !== "" ? data.articlePicture : `/uploads/news/${data.articlePicture}`}
                 alt={data.title}
               />
             </div>

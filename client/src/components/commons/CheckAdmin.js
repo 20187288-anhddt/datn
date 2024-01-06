@@ -22,7 +22,7 @@ export default function CheckAdmin(props) {
                       <i className="fas fa-comments mr-4"></i>Quản lý bình luận
                       </Link>
                       <Link to="/admin/categories" className="dropdown-item">
-                      <i className="fas fa-list-alt mr-4"></i>Thể loại
+                      <i className="fas fa-list-alt mr-4"></i>Quản lý thể loại
                       </Link>
                       <div className="dropdown-divider"></div>
                       <Link to="/admin/news/add" className="dropdown-item">

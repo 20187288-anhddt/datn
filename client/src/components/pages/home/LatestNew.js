@@ -20,7 +20,7 @@ export default function LatestNew() {
 
   return (
     <div>
-      <h3 className="mb-3 text-red font-weight">Tin tức mới nhất</h3>
+      <h4 className="mb-3 text-red font-weight" style={{ fontSize: '20px' }}>Tin tức mới nhất</h4>
       {latest ? (
         latest.map((item, index) => {
           let url = `/${hanldeUrlPretty(item.title)}/${item._id}`;
@@ -42,7 +42,7 @@ export default function LatestNew() {
                 />
               </div>
               <div className="latest-new__info">
-                <h5 className="latest-new__title">{item.title}</h5>
+                <h5 className="latest-new__title" style={{ fontSize: '14px' }}>{item.title}</h5>
               </div>
             </Link>
           );

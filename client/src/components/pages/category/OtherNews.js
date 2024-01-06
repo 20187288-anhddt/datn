@@ -28,11 +28,11 @@ export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightN
   }, [tags, newsByTag, newsHighlightId, highlightNew, displayedNewsCount]);
 
   const handleScroll = () => {
-    const scrollPosition = window.innerHeight + document.documentElement.scrollTop;
-    const pageHeight = document.documentElement.offsetHeight;
+    const scrollPosition = window.innerHeight + window.scrollY;
+    const pageHeight = document.documentElement.scrollHeight;
 
-    if (scrollPosition === pageHeight) {
-      // Nếu người dùng đã kéo đến cuối trang, tăng số lượng bài viết được hiển thị
+    if (scrollPosition >= pageHeight) {
+      // If the user has scrolled to the bottom, increase the displayed news count
       setDisplayedNewsCount((prevCount) => prevCount + 20);
     }
   };
@@ -42,7 +42,7 @@ export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightN
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []); // Chạy chỉ một lần khi thành phần được tạo
+  }, [])// Chạy chỉ một lần khi thành phần được tạo
 
   return (
     <React.Fragment>
@@ -62,7 +62,7 @@ export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightN
                   >
                     <div className="other-new__image border border-secondary">
                       <img
-                        src={item.content === "" ? item.articlePicture : `/uploads/news/${item.articlePicture}`}
+                        src={item.source === "" ? item.articlePicture : `/uploads/news/${item.articlePicture}`}
                         alt={item.title}
                       />
                     </div>
@@ -100,7 +100,7 @@ export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightN
               >
                 <div className="other-new__image border border-secondary">
                   <img
-                    src={item.content === "" ? item.articlePicture : `/uploads/news/${item.articlePicture}`}
+                    src={item.source !== "" ? item.articlePicture : `/uploads/news/${item.articlePicture}`}
                     alt={item.title}
                   />
                 </div>

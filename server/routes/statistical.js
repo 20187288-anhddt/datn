@@ -544,5 +544,121 @@ router.get("/topMostViewed", async (req, res) => {
 });
 
 
+router.get("/channels/follows", async (req, res) => {
+  try {
+    const { channelId } = req.query;
+    const Users = await UsersModel.find({
+      isDelete: false,
+      role: "journalist",
+      _id: channelId
+    });
+
+    if (Users) {
+      return res.json({
+        code: 200,
+        err: null,
+        data: Users
+      });
+    }
+  } catch (error) {
+    return res.json({
+      code: 400,
+      err: error
+    });
+  }
+});
+
+
+// journalist
+
+router.get("/channels/follows", async (req, res) => {
+  try {
+    const { channelId } = req.query;
+    const Users = await UsersModel.find({
+      isDelete: false,
+      role: "journalist",
+      _id: channelId
+    });
+
+    if (Users) {
+      return res.json({
+        code: 200,
+        err: null,
+        data: Users
+      });
+    }
+  } catch (error) {
+    return res.json({
+      code: 400,
+      err: error
+    });
+  }
+});
+
+// top 5 bai viet
+router.get("/channels/bestNews", async (req, res) => {
+  try {
+    const { channelId } = req.query;
+    const Users = await NewsModel.find({
+      isDelete: false,
+      createdBy: channelId
+    }).limit(5).sort({ view: -1 });
+
+    if (Users) {
+      return res.json({
+        code: 200,
+        err: null,
+        data: Users
+      });
+    }
+  } catch (error) {
+    return res.json({
+      code: 400,
+      err: error
+    });
+  }
+});
+
+router.get("/viewsOfMonthByChannel", async (req, res) => {
+  try {
+    const { month, channelId } = req.query;
+    console.log(month, channelId);
+
+    const startMonth = new Date(
+      moment(month)
+      .startOf("month")
+      .format("YYYY-MM-DD")
+    );
+
+    const endMonth = new Date(
+      moment(startMonth)
+      .endOf("month")
+      .format("YYYY-MM-DD")
+    );
+ 
+    const viewToMonth = await ViewModel.find({
+        isDelete: false,
+        date: {
+          $gte: startMonth,
+          $lte: endMonth
+        },
+        createdBy: channelId
+      }).sort({
+        view: -1
+      })
+      .populate("createdBy");
+
+    return res.json({
+      data: viewToMonth
+    });
+  } catch (err) {
+    console.log(err);
+    return res.json({
+      code: 400,
+      err: err.messege,
+      data: null
+    });
+  }
+});
 
 module.exports = router;
