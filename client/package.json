@@ -28,7 +28,15 @@
     "react-table-v6": "^6.8.6",
     "redux": "^4.1.2",
     "redux-thunk": "^2.4.1",
-    "web-vitals": "^1.1.2"
+    "web-vitals": "^1.1.2",
+    "image-size": "^1.1.1",
+    "image-type": "^5.2.0",
+    "mime-types": "^2.1.35",
+    "openai": "^4.24.1",
+    "react-google-recaptcha": "^3.1.0",
+    "react-slick": "^0.29.0",
+    "react-table-6": "^6.11.0",
+    "slick-carousel": "^1.8.1"
   },
   "scripts": {
     "start": "export NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
