@@ -7,7 +7,7 @@ import NewsOther from "./NewsOther";
 import AdditionalNew from "./AdditionalNew";
 import GiaVang from "../util/giaVang";
 import CoinGeckoWidget from "../util/coinGeckoWidget";
-
+import NewsChannel from "./NewsChannel";
 export default function Home() {
   useEffect(() => {
     const fixedElement = document.getElementById("fixedElementContainer");
@@ -44,17 +44,18 @@ export default function Home() {
       </Helmet>
       <div className="container">
         <div className="row">
-          <div className="col-lg-3 col-md-5">
+          <div className="col-lg-4 col-md-5">
             <LatestNew />
           </div>
-          <div className="col-lg-6 col-md-7 main-featured-new">
+          <div className="col-lg-5 col-md-7 main-featured-new">
             <h4 className="mb-3 text-red font-weight" style={{ fontSize: '21px' }}>
-              Tin tức được quan tâm nhất trong 24h qua
+              Tin tức được quan tâm nhất 24h qua 🔥
             </h4>
             <FeaturedNew />
           </div>
           <div className="col-lg-3 col-md-12">
             <FeaturedChannel />
+            <NewsChannel />
           </div>
         </div>
 
@@ -71,7 +72,7 @@ export default function Home() {
           }}
         >
           <div className="col-lg-8 main-featured-new">
-            <h3 className="mb-3 mt-3 text-red font-weight">Tin khác</h3>
+            <h3 className="mb-3 text-red font-weight pt-3" style={{borderTop: "1px solid #bbbbbb",}}>Tin khác</h3>
             <NewsOther />
           </div>
           <div

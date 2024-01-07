@@ -49,6 +49,10 @@ export default function Footer() {
     'bao-anh-viet-nam.gif',
     'Lecourrie.jpg',
     'Logo__VLLF_in-Website__01.gif',
+    'Zing_News.svg',
+    'TienPhong-Logo.jpg',
+    'skds.svg',
+    'vnevne.jpg',
     'logo-NXBTT.jpg',
     'LogoBADTMN.jpg',
     'logoBG.png',
@@ -56,7 +60,6 @@ export default function Footer() {
     'truyen-hinh-thong-tan.jpg',
     'viet-nam-news.gif',
     'viet-nam-plus.gif',
-
     'bao-anh-viet-nam.gif',
     'Lecourrie.jpg',
     'Logo__VLLF_in-Website__01.gif',
@@ -118,11 +121,11 @@ export default function Footer() {
         <div className="col-md-6 mx-auto">
   <div className="d-flex align-items-center"> {/* Use flex container for image and information */}
     <div className="mr-3"> {/* Adjust margin as needed */}
-      <img
+      <Link to="/"> <img
         src="/Logo-news.png"
         alt="Your Image Alt Text"
         style={{ width: '150px', height: 'auto' }}  
-      />
+      /></Link>
     </div>
     <div>
       <h5 className="font-weight-bold text-uppercase mt-3 mb-4">Tạp chí điện tử Bk News</h5>
@@ -141,7 +144,7 @@ export default function Footer() {
   </div>
 </div>
 
-          <div className="col-md-4 mx-auto">
+          <div className="col-md-4 mx-auto mt-3 mb-4">
 
             <iframe
               src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fdhbkhanoi%2F&tabs=timeline&width=340&height=130&small_header=false&adapt_container_width=false&hide_cover=false&show_facepile=true&appId"

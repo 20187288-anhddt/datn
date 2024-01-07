@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-// import ReactTable from "react-table";
+import ReactTable from "react-table-6";
 import "react-table-6/react-table.css";
 import { setMessage } from "../../../actions/message.action";
 import { useDispatch } from "react-redux";
@@ -10,96 +10,119 @@ import Message from "../Message";
 import { closeMessage } from "../closeMessage";
 
 export default function News() {
-  const [news, setNews] = React.useState([]);
-  const [amountTrash, setAmountTrash] = React.useState(0);
-  const [total, setTotal] = React.useState(0);
-  const [notApproved, setNotApproved] = React.useState(0);
-  const [notPublished, setNotPublished] = React.useState(0);
-  const [published, setPublished] = React.useState(0);
+  const [news, setNews] = useState([]);
+  const [amountTrash, setAmountTrash] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [notApproved, setNotApproved] = useState(0);
+  const [notPublished, setNotPublished] = useState(0);
+  const [published, setPublished] = useState(0);
   const dispatch = useDispatch();
   const userId = sessionStorage.getItem("userId");
 
-  React.useEffect(() => {
+  useEffect(() => {
+    // Clear previous messages
     dispatch(setMessage({ message: "" }));
+
     const fetchNews = async () => {
       if (userId) {
-        const res = await axios.get(`/news/${userId}`);
-        const data = res.data.data;
+        try {
+          const res = await axios.get(`/news/${userId}`);
+          const data = res.data.data;
 
-        function getData(property) {
-          const rs = data.filter(v => v.status === property);
-          return rs;
+          function getData(property) {
+            return data.filter((v) => v.status === property);
+          }
+
+          const notApproved = getData("undefined");
+          const notPublished = getData("edited");
+          const published = getData("published");
+
+          setNews(data);
+          setTotal(data.length);
+          setNotApproved(notApproved.length);
+          setNotPublished(notPublished.length);
+          setPublished(published.length);
+        } catch (error) {
+          console.error("Error fetching news:", error);
         }
-
-        const notApproved = getData("new");
-        const notPublished = getData("edited");
-        const published = getData("published");
-
-        setNews(data);
-        setTotal(data.length);
-        setNotApproved(notApproved.length);
-        setNotPublished(notPublished.length);
-        setPublished(published.length);
       }
     };
 
     const fetchTrash = async () => {
-      const res = await axios.get(`/news/trash/${userId}`);
-      const data = res.data.data;
+      try {
+        const res = await axios.get(`/news/trash/${userId}`);
+        const data = res.data.data;
 
-      if (data) {
-        setAmountTrash(data.length);
+        if (data) {
+          setAmountTrash(data.length);
+        }
+      } catch (error) {
+        console.error("Error fetching trash:", error);
       }
     };
 
+    // Fetch news and trash data on component mount
     fetchNews();
     fetchTrash();
   }, [dispatch, userId]);
 
-  // move to trash
-  const hanldeMoveToTrash = async id => {
-    const res = await axios.put(`/news/trash/${id}`);
-    const { code, message, data } = res.data;
+  // Move to trash
+  const hanldeMoveToTrash = async (id) => {
+    try {
+      const res = await axios.put(`/news/trash/${id}`);
+      const { code, message, data } = res.data;
 
-    const news = await data.filter(v => v.isDelete === false && v.createdBy._id === userId);
-    const amountTrash = await data.filter(v => v.isDelete === true && v.createdBy._id === userId);
+      const news = data.filter((v) => !v.isDelete && v.createdBy._id === userId);
+      const amountTrash = data.filter((v) => v.isDelete && v.createdBy._id === userId);
 
-    setNews(news);
-    setAmountTrash(amountTrash.length);
-    dispatch(setMessage({ code, message }));
-    dispatch(closeMessage());
+      setNews(news);
+      setAmountTrash(amountTrash.length);
+      dispatch(setMessage({ code, message }));
+      dispatch(closeMessage());
+    } catch (error) {
+      console.error("Error moving to trash:", error);
+    }
   };
 
-  // bỏ nháp
+  // Give up draft
   const handleGiveUpDraft = async (id) => {
-    const res = await axios.put(`/news/giveUpDraft/${id}`);
-    const { code, message, data } = res.data;
+    try {
+      const res = await axios.put(`/news/giveUpDraft/${id}`);
+      const { code, message, data } = res.data;
 
-    const news = await data.filter(v => v.isDelete === false && v.createdBy === userId);
+      const news = data.filter((v) => !v.isDelete && v.createdBy._id === userId);
 
-    setNews(news);
-    dispatch(setMessage({ code, message }));
-    dispatch(closeMessage());
+      setNews(news);
+      dispatch(setMessage({ code, message }));
+      dispatch(closeMessage());
+    } catch (error) {
+      console.error("Error giving up draft:", error);
+    }
   };
 
-  // save nháp
+  // Save draft
   const handleSaveDraft = async (id) => {
-    const res = await axios.put(`/news/saveDraft/${id}`);
-    const { code, message, data } = res.data;
+    try {
+      const res = await axios.put(`/news/saveDraft/${id}`);
+      const { code, message, data } = res.data;
 
-    const news = await data.filter(v => v.isDelete === false && v.createdBy === userId);
+      const news = data.filter((v) => !v.isDelete && v.createdBy._id === userId);
 
-    setNews(news);
-    dispatch(setMessage({ code, message }));
-    dispatch(closeMessage());
+      setNews(news);
+      dispatch(setMessage({ code, message }));
+      dispatch(closeMessage());
+    } catch (error) {
+      console.error("Error saving draft:", error);
+    }
   };
 
+  // Define columns for the ReactTable
   const columns = [
     {
       Header: "TÊN BÀI VIẾT",
       accessor: "title",
       sortable: true,
-      filterable: true
+      filterable: true,
     },
     {
       Header: "STATUS",
@@ -107,16 +130,16 @@ export default function News() {
       sortable: true,
       maxWidth: 200,
       className: "text-center",
-      Cell: props => {
+      Cell: (props) => {
         return (
           <>
             <span
               className={
-                props.original.status === "new"
+                props.original.status === "undefined"
                   ? "badge badge-secondary"
                   : props.original.status === "edited"
                   ? "badge badge-info"
-                  : props.original.status === "draft"
+                  : props.original.status === "draft"||props.original.status === "unpublished"
                   ? "badge badge-dark"
                   : "badge badge-success"
               }
@@ -125,15 +148,17 @@ export default function News() {
             </span>
             <br />
             {props.original.status === "draft" ? (
-              <button onClick={() => handleGiveUpDraft(props.original._id)} className="btn btn-link">Xóa nháp</button>
-            )
-            : props.original.status === "new"
-            ? <button onClick={() => handleSaveDraft(props.original._id)} className="btn btn-link">Lưu nháp</button>
-            : null
-            }
+              <button onClick={() => handleGiveUpDraft(props.original._id)} className="btn btn-link">
+                Xóa nháp
+              </button>
+            ) : props.original.status === "new" ? (
+              <button onClick={() => handleSaveDraft(props.original._id)} className="btn btn-link">
+                Lưu nháp
+              </button>
+            ) : null}
           </>
         );
-      }
+      },
     },
     {
       Header: "ACTION",
@@ -141,7 +166,7 @@ export default function News() {
       sortable: false,
       maxWidth: 200,
       className: "text-center",
-      Cell: props => {
+      Cell: (props) => {
         return (
           <div>
             <Link
@@ -161,9 +186,10 @@ export default function News() {
             </button>
           </div>
         );
-      }
-    }
+      },
+    },
   ];
+
   return (
     <div className="content-wrapper">
       <div className="page-header">
@@ -217,14 +243,15 @@ export default function News() {
           </div>
         </div>
         <div className="col-xl-12 grid-margin stretch-card">
-          {/* <ReactTable
+          {/* ReactTable component */}
+          <ReactTable
             columns={columns}
             data={news}
             filterable
             defaultPageSize={10}
             noDataText={"Please wait..."}
             className="table mt-3"
-          /> */}
+          />
         </div>
       </div>
     </div>

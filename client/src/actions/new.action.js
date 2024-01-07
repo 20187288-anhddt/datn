@@ -15,9 +15,46 @@ const setLatestNews = (data) => ({
   payload: data
 });
 
+const setTintucNew = (data) => ({
+  type: "GET_TINTUC_NEWS",
+  payload: data
+});
+
 const setSearchNews = (data) => ({
   type: "GET_SEARCH_NEWS",
   payload: data
+});
+
+export const getLatestNewsByCategory = (categoryId, number) => {
+  return async (dispatch) => {
+    try {
+      dispatch(setLoading(true));
+
+      const res = await axios.get(`/news/categories/new/${categoryId}`, { params: { number: number } });
+      const data = res.data.data;
+
+      dispatch(setLatestNewsByCategory(data));
+      dispatch(setLoading(false));
+    } catch (error) {
+      dispatch(setLoading(false));
+      dispatch(setError(`Lỗi khi lấy tin tức: ${error.message}`));
+    }
+  };
+};
+
+export const setLoading = (loading) => ({
+  type: "SET_LOADING",
+  payload: loading,
+});
+
+export const setLatestNewsByCategory = (data) => ({
+  type: "SET_LATEST_NEWS_BY_CATEGORY",
+  payload: data,
+});
+
+export const setError = (error) => ({
+  type: "SET_ERROR",
+  payload: error,
 });
 
 export const getNews = () => {
@@ -38,12 +75,22 @@ export const getNewsOther = (number) => {
   };
 };
 
+
 export const getLatestNews = () => {
   return async dispatch => {
     const res = await axios.get("/news/latestNews");
     const data = res.data.data;
 
     dispatch(setLatestNews(data));
+  };
+};
+
+export const getTintucNew = () => {
+  return async dispatch => {
+    const res = await axios.get("/news/latestNews");
+    const data = res.data.data;
+
+    dispatch(setTintucNew(data));
   };
 };
 

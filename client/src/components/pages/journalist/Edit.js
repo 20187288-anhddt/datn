@@ -1,7 +1,7 @@
-import React from "react";
+import React, {useState} from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import CKEditor from "@ckeditor/ckeditor5-react";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 import { setMessage } from "../../../actions/message.action";
@@ -15,8 +15,9 @@ export default function Edit({ match }) {
   const [file, setFile] = React.useState(null);
   const [categories, setCategories] = React.useState([]);
   const [newData, setNewData] = React.useState([]);
-  const [news, setNews] = React.useState({tag: ""});
-
+  const [news, setNews] = React.useState({ tag: "" });
+  const [loading, setLoading] = React.useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const dispatch = useDispatch();
 
   React.useEffect(() => {
@@ -32,7 +33,6 @@ export default function Edit({ match }) {
     const fetchNew = async () => {
       const res = await axios.get(`/news/new/${match.params.id}`);
       const data = res.data.data[0];
-
       setNewData(data);
       setTags(data.tag);
     };
@@ -41,8 +41,8 @@ export default function Edit({ match }) {
     fetchNew();
   }, [dispatch, match.params.id]);
 
-  const handleChange = e => {
-    setNews({ ...news, [e.target.name]: e.target.value});
+  const handleChange = (e) => {
+    setNews({ ...news, [e.target.name]: e.target.value });
   };
 
   const hanldAddTag = () => {
@@ -50,7 +50,7 @@ export default function Edit({ match }) {
       setTagAlready("Bạn cần nhập tag");
     } else {
       if (tags) {
-        const tagExist = tags.filter(v => v.toLowerCase() === news.tag.toLowerCase());
+        const tagExist = tags.filter((v) => v.toLowerCase() === news.tag.toLowerCase());
 
         if (tagExist.length > 0) {
           setTagAlready("Tag đã tồn tại");
@@ -62,41 +62,47 @@ export default function Edit({ match }) {
     }
   };
 
-  // remove tag
   const hanldeRemoveTag = (index) => {
-    const newTag = [ ...tags ];
+    const newTag = [...tags];
     newTag.splice(index, 1);
 
     setTags(newTag);
   };
 
-  const hanldChangeContent = content => {
+  const hanldChangeContent = (content) => {
     setContent(content);
   };
 
-  const hanldeChangeUpload = e => {
-    setFile(e.target.files[0]);
+  const hanldeChangeUpload = (event) => {
+    const file = event.target.files[0];
+    setSelectedFile(file);
   };
 
-  const hanldeSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("title", news.title || newData.title);
+    formData.append("cateNews", news.category || newData.cateNews._id);
+    formData.append("content", content || newData.content);
+    formData.append("tags", JSON.stringify(tags));
+    formData.append("file", file || newData.articlePicture);
+    formData.append("sapo", news.sapo || newData.sapo || "");
+    formData.append("status", "undefined");
+    formData.append("originalLink", news.originalLink || newData.originalLink || "");
 
     try {
-      const formData = new FormData();
-
-      formData.append('title', news.title || newData.title);
-      formData.append('categoryId', news.category || newData.cateNews._id);
-      formData.append('content', content || newData.content);
-      formData.append('tags', JSON.stringify(tags));
-      formData.append("file", file || newData.articlePicture);
-
       const res = await axios.put(`/news/${match.params.id}`, formData);
       const { code, message } = res.data;
 
       dispatch(setMessage({ code, message }));
       dispatch(closeMessage());
     } catch (error) {
-      console.log(error);
+      console.error("Error while updating news:", error);
+      dispatch(setMessage({ code: "error", message: "An error occurred while updating news." }));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,21 +113,12 @@ export default function Edit({ match }) {
           <span className="page-title-icon bg-gradient-danger text-white mr-2">
             <i className="mdi mdi-format-list-bulleted" />
           </span>
-          Edit
+          Chỉnh sửa
         </h3>
-        <nav aria-label="breadcrumb">
-          <ul className="breadcrumb">
-            <li className="breadcrumb-item active" aria-current="page">
-              <span />
-              Overview
-              <i className="mdi mdi-alert-circle-outline icon-sm text-danger align-middle" />
-            </li>
-          </ul>
-        </nav>
       </div>
-      <div className="row">
+      <div className="row" style={{ padding: "0px 30px" }}>
         <div className="col-xl-12 grid-margin">
-          <form onSubmit={hanldeSubmit} className="w-100">
+          <form onSubmit={handleSubmit} className="w-100">
             <Message />
             <div className="form-group">
               <label>Tiêu đề:</label>
@@ -129,8 +126,19 @@ export default function Edit({ match }) {
                 type="text"
                 name="title"
                 className="form-control"
-                placeholder="Enter new title..."
+                placeholder="Nhập tiêu đề..."
                 value={news.title || newData.title || ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-group">
+              <label>Sapo:</label>
+              <input
+                type="text"
+                name="sapo"
+                className="form-control"
+                placeholder="Nhập Sapo"
+                value={news.sapo || newData.sapo || ""}
                 onChange={handleChange}
               />
             </div>
@@ -191,12 +199,10 @@ export default function Edit({ match }) {
                   </small>
                 )}
               </div>
-              {tagAlready ? (
+              {tagAlready && (
                 <div>
                   <small className="text-danger">{tagAlready}</small>
                 </div>
-              ) : (
-                ""
               )}
             </div>
             <div className="form-group">
@@ -218,14 +224,33 @@ export default function Edit({ match }) {
                   name="filename"
                   onChange={hanldeChangeUpload}
                 />
-                <label style={{ height: "calc(1.5em + 0.75rem + 0px)" }} className="custom-file-label bd-none bdr-none" htmlFor="customFile">
-                  Choose file
-                </label>
+                 <label style={{ height: "calc(1.5em + 0.75rem + 0px)" }} className="custom-file-label bd-none bdr-none" htmlFor="customFile">
+          {selectedFile ? selectedFile.name : "Choose file"}
+        </label>
               </div>
             </div>
-            <button type="submit" className="btn btn-danger">
+            <div className="form-group">
+              <label>Đường dẫn bài viết gốc (Nếu có):</label>
+              <input
+                type="text"
+                name="originalLink"
+                className="form-control"
+                placeholder="Nhập đường dẫn bài viết gốc"
+                value={news.originalLink || newData.originalLink || ""}
+                onChange={handleChange}
+              />
+            </div>
+
+            <button type="submit" className="btn btn-danger bety-btn ">
               SỬA
             </button>
+            {loading && (
+              <div className="text-center">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="sr-only">Loading...</span>
+                </div>
+              </div>
+            )}
           </form>
         </div>
       </div>

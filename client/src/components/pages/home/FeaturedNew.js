@@ -42,7 +42,7 @@ export default function FeaturedNew() {
             <div className="featured-new__info">
               <h4 className="featured-new__title">{item.title}</h4>
               <i className="mdi mdi-av-timer" />{" "}
-              {moment(item.dateCreate).format("DD-MM-YYYY")} -{" "}
+              {moment(item.dateCreate).format("HH:mm DD-MM-YYYY")} -{" "}
               <i className="mdi mdi-eye" /> {item.view}
               <br></br>
               {item.source && (

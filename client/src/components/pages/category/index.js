@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Helmet } from 'react-helmet';
 import axios from "axios";
 
-import HightlightedNews from "./HightlightedNews";
+import HighlightNews from "./HighlightNews";
 import OtherNews from "./OtherNews";
 import FeaturedChannel from "../home/FeaturedChannel";
 import LatestNew from "../home/LatestNew";
-import KinhDoanhNews from "./KinhDoanhNews";
+import ChannelCate from "./ChannelCate";
+import HotNewsByCate from "./HotNewsByCate";
+
+
 export default function Category({ match }) {
 	const [highlightNew, setHighlightNew] = useState({});
 	const [categoryName, setCategoryName] = useState("");
@@ -55,7 +58,8 @@ export default function Category({ match }) {
 				<div className="container">
 					<div className="row">
 						<div className="col-xl-9 col-lg-9 col-sm-12">
-							<HightlightedNews news={highlightNew} />
+													<HotNewsByCate />
+							{/* <HighlightNews news={highlightNew} /> */}
 							{
 								highlightNew
 									? 
@@ -73,7 +77,10 @@ export default function Category({ match }) {
 						<div className="col-xl-3 col-lg-3 col-sm-12">
 							<div className="mb-4">
 							</div>
+							<LatestNew />
+							<ChannelCate />
 							<FeaturedChannel />
+							
 						</div>
 					</div>
 				</div>

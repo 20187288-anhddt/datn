@@ -96,6 +96,7 @@ class ArticalCrawler {
     this.crawler.queue("https://suckhoedoisong.vn");
     this.crawler.queue("https://baotintuc.vn");
     this.crawler.queue("https://tienphong.vn");
+    //this.crawler.queue("https://vnexpress.net");
   }
 }
 

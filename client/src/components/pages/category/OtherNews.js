@@ -46,6 +46,9 @@ export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightN
 
   return (
     <React.Fragment>
+            <h3 className="mb-3 text-red font-weight pt-3">
+        <center>Tin tức tổng hợp về {categoryName}</center>
+      </h3>
       {tagsOtherNews && (
         tagsOtherNews.map((tag, index) => (
           <div className="" key={index}>
@@ -68,7 +71,7 @@ export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightN
                     </div>
                     <div className="other-new__info">
                       <h4 className="other-new__title">{item.title}</h4>
-                      <i className="mdi mdi-av-timer" /> {moment(item.dateCreate).format("DD-MM-YYYY")} -{" "}
+                      <i className="mdi mdi-av-timer" /> {moment(item.dateCreate).format("HH:mm DD-MM-YYYY")} -{" "}
                       <i className="mdi mdi-eye" /> {item.view}
                       <br></br>
                       {item.source && (<span className="news-source-title"> Nguồn: {item.source}</span>)}
@@ -83,9 +86,7 @@ export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightN
         ))
       )}
 
-      <h3 className="mb-3 text-red font-weight pt-3">
-        Tin tức tổng hợp về {categoryName}
-      </h3>
+
 
       <div className="col-lg-12 pt-1">
         <div className="row">
@@ -94,7 +95,7 @@ export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightN
               <Link
                 to={`/${hanldeUrlPretty(item.title)}/${item._id}`}
                 key={index}
-                className="additonal-new p-3 bg-white rounded text-decoration-none col-lg-5 m-2 text-color"
+                className="additonal-new p-3 bg-white rounded text-decoration-none custom-col-lg-5 m-2 text-color"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -106,7 +107,7 @@ export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightN
                 </div>
                 <div className="other-new__info">
                   <h4 className="other-new__title">{item.title}</h4>
-                  <i className="mdi mdi-av-timer" /> {moment(item.dateCreate).format("DD-MM-YYYY")} -{" "}
+                  <i className="mdi mdi-av-timer" /> {moment(item.dateCreate).format("HH:mm DD-MM-YYYY")} -{" "}
                   <i className="mdi mdi-eye" /> {item.view}
                   <br></br>
                   {item.source && (<span className="news-source-title"> Nguồn: {item.source}</span>)}
@@ -121,3 +122,4 @@ export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightN
     </React.Fragment>
   );
 }
+

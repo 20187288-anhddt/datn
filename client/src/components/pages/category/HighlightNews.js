@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import BoxLoadingItem from "../../BoxLoadingItem";
 import { hanldeUrlPretty } from "../../mixin/UrlPretty";
 
-export default function NewsHighlight(props) {
+export default function HighlightNews(props) {
   const [highlightNew, setHighlightNew] = React.useState({});
 
   React.useEffect(() => {

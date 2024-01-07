@@ -31,6 +31,12 @@ export default function GiaVang() {
         style={{ border: "none", width: "100%", height: "800px" }}
         src="https://tygiado.com/nhung-gia-vang/"
       ></iframe>
+              <div className="mt-3 mb-4">
+          <img
+            width="100%"
+            src="/uploads/banners/banner_giai_thuong_sach_quoc_gia.jpg"
+            alt="banner"
+          /></div>
     </div>
   );
 }

@@ -64,6 +64,13 @@ export default function NewsManagement() {
       sortable: true,
       filterable: true,
       maxWidth: 150,
+      Cell: (props) => {
+        return props.value ? (
+          <span>{props.value}</span>
+        ) : (
+          <span>{props.original.createdBy.username}</span>
+        );
+      },
     },
     {
       Header: "Thể loại",

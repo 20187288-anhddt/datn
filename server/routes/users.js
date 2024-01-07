@@ -54,8 +54,7 @@ router.get("/", async (req, res, next) => {
 /* GET channel. */
 router.get("/channels", async (req, res, next) => {
   const users = await UserModel.find({ role: "journalist" })
-    .limit(4)
-    .sort({ follow: -1 });
+
 
   try {
     res.json({

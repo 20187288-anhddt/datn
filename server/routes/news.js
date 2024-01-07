@@ -517,6 +517,35 @@ router.get("/categories/:id", async function (req, res, next) {
   }
 });
 
+router.get("/categories/new/:id", async function (req, res, next) {
+  try {
+    // Trích xuất ID của danh mục từ tham số URL
+    const categoryId = req.params.id;
+
+    // Lấy tin tức với trạng thái "published" cho ID danh mục đã chỉ định
+    const news = await NewsModel.find({
+      status: "published",
+      cateNews: categoryId,
+    })
+      .populate("cateNews")
+      .populate("createdBy").limit(5);
+
+    // Trả về tin tức đã lấy
+    return res.json({
+      code: 200,
+      error: null,
+      data: news,
+    });
+  } catch (error) {
+    // Trả về thông báo lỗi chi tiết hơn
+    return res.status(400).json({
+      code: 400,
+      error: `Lỗi khi lấy tin tức: ${error.message}`,
+      data: null,
+    });
+  }
+});
+
 // Hiển thị tin tức của một subCateNews cụ thể (trạng thái = "published")
 router.get("/subCategories/:id", async function (req, res, next) {
   try {

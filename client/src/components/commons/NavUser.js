@@ -125,7 +125,7 @@ export default function NavUser(props) {
                       <span>Đăng nhập</span>
                     </Link>
                     <Link className="dropdown-item" to="/register">
-                    <i class="fas fa-sign-out-alt mr-4" ></i>
+                    <i className="fas fa-sign-out-alt mr-4" ></i>
                       <span>Đăng ký</span>
                     </Link>
                   </div>

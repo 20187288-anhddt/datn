@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
@@ -17,6 +17,7 @@ export default function EditNews({ match }) {
   const [newData, setNewData] = React.useState([]);
   const [news, setNews] = React.useState({ tag: "" });
   const [loading, setLoading] = React.useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const dispatch = useDispatch();
 
@@ -72,9 +73,9 @@ export default function EditNews({ match }) {
   const hanldChangeContent = (content) => {
     setContent(content);
   };
-
-  const hanldeChangeUpload = (e) => {
-    setFile(e.target.files[0]);
+  const hanldeChangeUpload = (event) => {
+    const file = event.target.files[0];
+    setSelectedFile(file);
   };
 
   const handleSubmit = async (e) => {
@@ -224,21 +225,22 @@ export default function EditNews({ match }) {
                   onChange={hanldeChangeUpload}
                 />
                 <label style={{ height: "calc(1.5em + 0.75rem + 0px)" }} className="custom-file-label bd-none bdr-none" htmlFor="customFile">
-                  Choose file
-                </label>
+          {selectedFile ? selectedFile.name : "Choose file"}
+        </label>
               </div>
             </div>
             <div className="form-group">
               <label>Trạng thái:</label>
               <select
-                name="status"
-                className="form-control"
-                onChange={handleChange}
-                value={news.status || newData.status}
-              >
-                <option value="published">Xuất bản</option>
-                <option value="unpublished">Chưa xuất bản</option>
-              </select>
+              name="status"
+              className="form-control"
+              onChange={handleChange}
+              value={news.status || newData.status || ""}
+            >
+              <option value="">Select Status</option>
+              <option value="published">Xuất bản</option>
+              <option value="unpublished">Chưa xuất bản</option>
+            </select>
             </div>
             <div className="form-group">
               <label>Đường dẫn bài viết gốc (Nếu có):</label>

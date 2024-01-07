@@ -20,7 +20,7 @@ export default function LatestNew() {
 
   return (
     <div>
-      <h4 className="mb-3 text-red font-weight" style={{ fontSize: '20px' }}>Tin tức mới nhất</h4>
+      <h4 className="mb-3 text-red font-weight" style={{ fontSize: '20px' }}><i className="fas fa-bolt"></i> Tin tức mới nhất</h4>
       {latest ? (
         latest.map((item, index) => {
           let url = `/${hanldeUrlPretty(item.title)}/${item._id}`;
@@ -30,6 +30,7 @@ export default function LatestNew() {
               key={index}
               className="latest-new p-1 bg-white rounded text-decoration-none text-dark"
               rel="noopener noreferrer"
+              style={{ height: '83px' }}
             >
               <div className="latest-new__image">
                 <img

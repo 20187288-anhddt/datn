@@ -65,7 +65,7 @@ export default function NewsOther() {
                 <h4 className="other-new__title">{item.title}</h4>
                 <p className="other-new__createby text-secondary">
                   <i className="mdi mdi-av-timer" />{" "}
-                  {moment(item.dateCreate).format("DD-MM-YYYY")} -{" "}
+                  {moment(item.dateCreate).format("HH:mm DD-MM-YYYY")} -{" "}
                   <i className="mdi mdi-eye" /> {item.view}
                   {item.source && (
                     <span className="news-source-title">

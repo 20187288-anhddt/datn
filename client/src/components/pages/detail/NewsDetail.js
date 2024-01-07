@@ -152,6 +152,7 @@ export default function NewsDetail(props) {
     <b style={{ fontSize: "18px" }}>
   {datas.sapo}
 </b>
+
 <br />
 <br />
   </>
@@ -159,7 +160,7 @@ export default function NewsDetail(props) {
   <BoxLoadingDetail />
 )}
                             
-            <div className="text-justify"  >
+            <div className="text-justify"  style={{fontSize:'22px' }}>
                 {datas.content !== null ? (
                   <div dangerouslySetInnerHTML={{ __html: datas.content }} style={{ fontSize: '50px !important' }}></div>
                 ) : (

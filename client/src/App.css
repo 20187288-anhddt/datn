@@ -403,6 +403,7 @@ img {
   justify-content: center;
 }
 .other-new:first-of-type .other-new__image {
+  
   height: 20rem;
   overflow: hidden;
 }
@@ -827,6 +828,9 @@ img {
     transition: transform 1s ease !important; /* Adjust the duration as needed */
   }
   .custom-col-lg-5 {
-    flex: 0 0 calc((100% - 20px) / 5.5); 
-    max-width: calc((100% - 20px) / 5.5);
-  }
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 48%;
+    flex: 0 0 48%;
+    max-width: 48%; }
+  
+

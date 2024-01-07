@@ -142,16 +142,17 @@ class TienphongModel extends BaseModel {
     }
 }
 
-class VnExpressModel extends BaseModel{
-    init(){
-        this.hostName = "vnexpress.net"
+class VnExpressModel extends BaseModel {
+    init() {
+        this.hostName = "vnexpress.net";
     }
 
-    async parse(){
-        const $ = this.res.$
-        const self = this
-        $(".item-news.item-news-common").each(async (index, element)=>{
-            const element_query =  $(element)
+    async parse() {
+        const $ = this.res.$;
+        const self = this;
+        
+        $(".item-news.item-news-common").each(async (index, element) => {
+            const element_query = $(element);
             const article = {
                 title: element_query.find('h3 a[title]').text().trim(),
                 link: element_query.find('a').attr("href"),
@@ -159,17 +160,24 @@ class VnExpressModel extends BaseModel{
                 sapo: element_query.find(".description a").text().trim(),
                 source: self.hostName,
                 dateCreate: (element_query.find(".time").text() + " " + element_query.find(".date").text()).trim()
+            };
+            
+            try {
+                const res = await fetch(article.link);
+                const temp = cheerio.load(res.text());
+                article.category = temp("a[data-medium]").attr("title");
+                console.log(article.category);
+                self.articles.push(article);
+            } catch (error) {
+                console.error("Error fetching or parsing article:", error);
             }
-            let res = await fetch(article.link)
-            let temp = cheerio.load(res.text())
-            article.category = temp("a[data-medium]").attr("title")
-            console.log(article.category)
-            this.articles.push(article)
-        })
-        
-        return this.articles
+        });
+
+        return this.articles;
     }
 }
+
+
 
 const crawlerModelClasses = [TienphongModel, ZingNewsModel, BaoTinTucModel, SuckhoedoisongModel, VnExpressModel]
 export {crawlerModelClasses}

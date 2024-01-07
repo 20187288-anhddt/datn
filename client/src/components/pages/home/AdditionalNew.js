@@ -50,8 +50,10 @@ export default function AdditionalNew() {
 
   return (
     <React.Fragment>
-      <h3 className="mb-3 text-red font-weight pt-3" style={style}>
-      <i className="fas fa-rss-square mr-4"></i>Thời sự</h3>
+      <Link to={`/category/giai-tri/5dbe935fd84e1413ac50c2bc`}>
+        <h3 className="mb-3 text-red font-weight pt-3" style={style}>
+        <i className="fas fa-rss-square mr-4"></i>Thời sự</h3>
+      </Link>
       <div className="col-lg-12 p-1">
   <div className="row">
     {newsReel ? (
@@ -75,7 +77,7 @@ export default function AdditionalNew() {
             <div className="other-new__info">
               <h4 className="other-new__title">{item.title}</h4>
               <i className="mdi mdi-av-timer" />{" "}
-              {moment(item.dateCreate).format("DD-MM-YYYY")} -{" "}
+              {moment(item.dateCreate).format("HH:mm DD-MM-YYYY")} -{" "}
               <i className="mdi mdi-eye" /> {item.view}
               <br />
               {item.source && (
@@ -93,9 +95,10 @@ export default function AdditionalNew() {
     )}
   </div>
 </div>
+<Link to={`/category/giai-tri/5df236197e9b891e9a040b35`}>
       <h3 className="mb-3 text-red font-weight pt-3" style={style}>
       <i className="fas fa-chart-area mr-4"> </i>Kinh Doanh
-      </h3>
+      </h3></Link>
       <div className="row">
         <div className="col-lg-12 col-md-6 main-featured-new">
         <coingecko-coin-price-marquee-widget  coin-ids="bitcoin,eos,ethereum,litecoin,ripple,binancecoin,venus-ltc,lunar-2,solana,adapad,dogecoin" currency="vnd" background-color="#ffffff" locale="vi"></coingecko-coin-price-marquee-widget>
@@ -128,7 +131,7 @@ export default function AdditionalNew() {
                   <div className="other-new__info">
                     <h4 className="other-new__title">{item.title}</h4>
                     <i className="mdi mdi-av-timer" />{" "}
-                    {moment(item.dateCreate).format("DD-MM-YYYY")} -{" "}
+                    {moment(item.dateCreate).format("HH:mm DD-MM-YYYY")} -{" "}
                     <i className="mdi mdi-eye" /> {item.view}
                     <br />
                     {item.source && (
@@ -144,10 +147,10 @@ export default function AdditionalNew() {
           : null}
       </div>
     </div>
-      </div>
+      </div><Link to={`/category/giai-tri/5dd4e90432e5ba1e1770a95f`}>
       <h3 className="mb-3 text-red font-weight pt-3" style={style}>
       <i className="fas fa-photo-video mr-4"></i>Giải trí
-      </h3>
+      </h3></Link>
       <div className="col-lg-12 p-1">
         <div className="row">
           {newsEntertainment
@@ -174,7 +177,7 @@ export default function AdditionalNew() {
                       ? `${item.title.substring(0, 84)}`
                       : item.title}</h4>
                     <i className="mdi mdi-av-timer" />{" "}
-                    {moment(item.dateCreate).format("DD-MM-YYYY")} -{" "}
+                    {moment(item.dateCreate).format("HH:mm DD-MM-YYYY")} -{" "}
                     <i className="mdi mdi-eye" /> {item.view}
                     <br></br>
                     {item.source && (
