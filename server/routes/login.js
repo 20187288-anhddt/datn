@@ -12,6 +12,8 @@ const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const sizeOf = require("image-size")
 const mime = require('mime-types');
+const logger = require("../utils/logger");
+
 const key = {
   tokenKey: "djghhhhuuwiwuewieuwieuriwu_cus",
 };
@@ -48,7 +50,7 @@ router.post("/signup", async function (req, res) {
       const hash = await bcrypt.hash(req.body.password, 8);
       const User = new UserModel();
 
-      User.username = req.body.userName;
+      User.username = req.body.username;
       User.password = hash;
       // User.image = file.name;
       User.email = req.body.email;
@@ -59,95 +61,19 @@ router.post("/signup", async function (req, res) {
         code: 200,
         message: "Bạn đã đăng ký thành công",
         data: { userCreate },
-      });
+      }) && logger.info({status:200, message: "Đăng ký thành công tài khoản", data: userCreate, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
     } else {
       return res.json({
         code: 200,
         message: "Người dùng đã tồn tại",
         data: null,
-      });
+      }) && logger.info({status:200, message: "Người dùng đã tồn tại", data: req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
     }
-  } catch (err) {
-    return res.json({ code: 400, message: err.message, data: null });
+  } catch (error) {
+    return logger.error({ code: 400, message: error.message, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack  });
   }
 });
 
-router.post("/register", async function (req, res) {
-  const { password, email, username } = req.params;
-
-  if (!email || !password || !username) {
-    return callRes(
-      res,
-      responseCode.PARAMETER_IS_NOT_ENOUGH,
-      "email, password, username"
-    );
-  }
-
-  if (
-    typeof email !== "string" ||
-    typeof password !== "string" ||
-    typeof username !== "string"
-  ) {
-    return callRes(
-      res,
-      responseCode.PARAMETER_TYPE_IS_INVALID,
-      "email, password, username"
-    );
-  }
-
-  if (!validInput.checkUserPassword(password)) {
-    return callRes(res, responseCode.PARAMETER_VALUE_IS_INVALID, "password");
-  }
-
-  if (!validInput.checkEmail(email)) {
-    return callRes(res, responseCode.PARAMETER_VALUE_IS_INVALID, "email");
-  }
-
-  if (!validInput.checkUserName(username)) {
-    return callRes(res, responseCode.PARAMETER_VALUE_IS_INVALID, "username");
-  }
-
-  if (email === password) {
-    return callRes(
-      res,
-      responseCode.PARAMETER_VALUE_IS_INVALID,
-      "trùng email và pass"
-    );
-  }
-
-  try {
-    let emailExists = await UserModel.findOne({ email });
-
-    if (emailExists) {
-      return res.json({
-        code: 200,
-        message: "Email đã được đăng ký trước đó",
-        data: null,
-      });
-    }
-
-    // Hash password nếu người dùng không tồn tại
-    const hash = await bcrypt.hash(password, 8);
-    const user = new UserModel({
-      username,
-      password: hash,
-      email,
-    });
-
-    const userCreate = await user.save();
-
-    return res.status(201).json({
-      code: 201,
-      message: "Bạn đã đăng ký thành công",
-      data: { userCreate },
-    });
-  } catch (err) {
-    console.error("Error during signup:", err);
-    return res
-      .status(500)
-      .json({ code: 500, message: "Internal Server Error", data: null });
-  }
-});
 
 router.post("/", async function (req, res, next) {
   try {
@@ -159,7 +85,7 @@ router.post("/", async function (req, res, next) {
         code: 400,
         message: "Vui lòng cung cấp cả email và password",
         data: null,
-      });
+      }) && logger.warn({status:400, message: "Vui lòng cung cấp cả email và password", data: req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
     }
 
     // Tìm kiếm người dùng trong cơ sở dữ liệu
@@ -171,7 +97,7 @@ router.post("/", async function (req, res, next) {
         code: 401,
         message: "Email không tồn tại, vui lòng kiểm tra lại!",
         data: null,
-      });
+      }) && logger.warn({status:401, message: "Email không tồn tại, vui lòng kiểm tra lại!", data: req.body , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
 
     // Kiểm tra tài khoản có bị khóa không
@@ -181,7 +107,7 @@ router.post("/", async function (req, res, next) {
         message:
           "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên!",
         data: null,
-      });
+      })&& logger.warn({status:401, message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên!", data: req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
     }
 
     // So sánh mật khẩu
@@ -200,22 +126,23 @@ router.post("/", async function (req, res, next) {
         message: "Đăng nhập thành công",
         data: { username, role, email, image, _id },
         token,
-      });
+      }) && logger.info({status:200, message: "Đăng nhập thành công", data: { username, role, email, image, _id },
+      token , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
+      ;
     } else {
       // Trường hợp mật khẩu không chính xác
       return res.status(401).json({
         code: 401,
         message: "Email hoặc mật khẩu không chính xác",
         data: null,
-      });
+      }) && logger.warn({status:401, message: "Email hoặc mật khẩu không chính xác", data: { username, role, email, image, _id }, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
-  } catch (err) {
+  } catch (error) {
     // Xử lý lỗi
-    return res
-      .status(400)
-      .json({ code: 400, message: err.message, data: null });
-  }
-});
+     logger.error({status:400, message: error.message, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
+      
+  } 
+}) ;
 
 // get user
 router.get("/:token", async (req, res) => {
@@ -225,7 +152,7 @@ router.get("/:token", async (req, res) => {
     return res.status(400).json({
       code: 400,
       message: "Token không được cung cấp",
-    });
+    }) && logger.warn({status:400, message: "Token không được cung cấp", data: req.params, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
   }
 
   let decoded;
@@ -235,14 +162,14 @@ router.get("/:token", async (req, res) => {
     return res.status(400).json({
       code: 400,
       message: "Token không hợp lệ",
-    });
+    })&& logger.warn({status:400, message: "Token không hợp lệ", data: req.params, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers , stack: error.stack });
   }
 
   if (!decoded || !decoded._id) {
     return res.status(400).json({
       code: 400,
       message: "Token không chứa thông tin người dùng hợp lệ",
-    });
+    })&& logger.warn({status:400, message: "Token không chứa thông tin người dùng hợp lệ", data: req.params , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});;
   }
 
   const id = decoded._id;
@@ -252,7 +179,7 @@ router.get("/:token", async (req, res) => {
     return res.status(404).json({
       code: 404,
       message: "Người dùng không tồn tại",
-    });
+    }) && logger.warn({status:404, message: "Người dùng không tồn tại", data: req.params , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
   }
 
   const { username, role, email, image, _id } = user;
@@ -260,7 +187,7 @@ router.get("/:token", async (req, res) => {
   return res.json({
     code: 200,
     data: { username, role, email, image, _id },
-  });
+  })&& logger.info({status:200, message: "Lấy thông tin user thành công", data: { username, role, email, image, _id }, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
 });
 
 // update name, email, password, photo
@@ -275,7 +202,7 @@ async (req, res) => {
       return res.status(404).json({
         code: 404,
         message: "Người dùng không tồn tại",
-      });
+      }) && logger.info({status:404, message: "Người dùng không tồn tại", data: req.params, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
     }
 
     // Cập nhật tên
@@ -293,14 +220,14 @@ async (req, res) => {
         code: 200,
         data: updatedUser,
         message: "Cập nhật tên thành công",
-      });
+      })&& logger.info({status:200, message: "Cập nhật tên thành công", data: updatedUser, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
   } catch (error) {
     console.error("Error during name update:", error);
     return res.status(500).json({
       code: 500,
       message: "Cập nhật tên thất bại",
-    });
+    }) && logger.error({status:500, message: "Cập nhật tên thất bại", data: req.params + req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
   }
 });
 
@@ -315,7 +242,7 @@ async (req, res) => {
       return res.status(404).json({
         code: 404,
         message: "Người dùng không tồn tại",
-      });
+      })&& logger.info({status:404, message: "Người dùng không tồn tại", data: req.params, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
     }
 
     // Kiểm tra email mới có hợp lệ không
@@ -325,7 +252,7 @@ async (req, res) => {
       return res.status(400).json({
         code: 400,
         message: "Email không hợp lệ",
-      });
+      })&& logger.warn({status:400, message: "Email không hợp lệ", data: req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
     }
 
     // Kiểm tra xem email mới đã tồn tại cho người dùng khác
@@ -340,14 +267,14 @@ async (req, res) => {
         code: 200,
         data: updatedUser,
         message: "Cập nhật email thành công",
-      });
+      }) && logger.info({status:200, message: "Cập nhật email thành công", data: updatedUser, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
     }
   } catch (error) {
     console.error("Error during email update:", error);
     return res.status(500).json({
       code: 500,
       message: "Cập nhật email thất bại",
-    });
+    })&&  logger.error({status:500, message: "Cập nhật email thất bại", error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers , stack: error.stack });;
   }
 });
 
@@ -361,20 +288,19 @@ async (req, res) => {
       return res.status(400).json({
         code: 400,
         message: "Vui lòng cung cấp cả mật khẩu hiện tại và mật khẩu mới",
-      });
+      })&& logger.warn({status:400, message: "Vui lòng cung cấp cả mật khẩu hiện tại và mật khẩu mới", data: req.body , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
     const userExist = await UserModel.findOne({ _id: req.params.id });
     if (!userExist) {
       return res.status(404).json({
         code: 404,
         message: "Người dùng không tồn tại",
-      });
+      }) && logger.warn({status:404, message: "Người dùng không tồn tại", data: req.params , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
     const comparePassword = await bcrypt.compare(
       currentPassword,
       userExist.password
     );
-    console.log(currentPassword);
     if (comparePassword) {
       if (validInput.checkUserPassword(currentPassword)) {
         return callRes(
@@ -402,20 +328,20 @@ async (req, res) => {
           data: updateUserPassword,
           code: 200,
           message: "Cập nhật mật khẩu thành công",
-        });
+        })&& logger.info({status:200, message: "Cập nhật mật khẩu thành công", data: updateUserPassword , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers}) ;
       }
     } else {
       return res.status(400).json({
         code: 400,
         message: "Mật khẩu hiện tại không đúng",
-      });
+      })&& logger.info({status:400, message: "Mật khẩu hiện tại không đúng", data: req.params && req.body,userId:req.params.id , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers}) ;
     }
   } catch (error) {
     console.error("Error during password update:", error);
     return res.status(500).json({
       code: 500,
       message: "Cập nhật mật khẩu thất bại",
-    });
+    }) && logger.error({status:500, message: "Cập nhật mật khẩu thất bại", error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack  }) ;;
   }
 });
 
@@ -427,7 +353,7 @@ router.put("/uploadAvatar/:id", async (req, res) => {
       return res.status(404).json({
         code: 404,
         message: "Người dùng không tồn tại",
-      });
+      })&& logger.warn({status:404, message: "Người dùng không tồn tại", data: req.params , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});;
     }
 
     const file = req.files && req.files.file;
@@ -436,7 +362,7 @@ router.put("/uploadAvatar/:id", async (req, res) => {
       return res.status(400).json({
         code: 400,
         message: "Không có file được tải lên",
-      });
+      })&& logger.warn({status:400, message: "Không có file được tải lên", data: req.params , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});;
     }
     // Tạo chuỗi ngày tháng
     const currentDate = new Date();
@@ -467,7 +393,7 @@ if (!mimeType || !acceptedFormats.includes(mimeType.split('/')[1])) {
   return res.status(400).json({
     code: 400,
     message: "Tập tin không phải là hình ảnh hợp lệ",
-  });
+  })&& logger.warn({status:400, message: "Tập tin không phải là hình ảnh hợp lệ", data: req.params, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
 }
 
 const dimensions = sizeOf(fileData);
@@ -476,10 +402,8 @@ if (!acceptedFormats.includes(dimensions.type.toLowerCase())) {
   return res.status(400).json({
     code: 400,
     message: "Tập tin không phải là hình ảnh hợp lệ",
-  });
+  })&& logger.warn({status:400, message: "Tập tin không phải là hình ảnh hợp lệ", data: req.params, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
 }
-
-
 
     // Di chuyển tập tin đến địa chỉ đích
     await file.mv(uploadPath);
@@ -498,7 +422,7 @@ if (!acceptedFormats.includes(dimensions.type.toLowerCase())) {
       return res.status(500).json({
         code: 500,
         message: "Cập nhật thông tin người dùng thất bại",
-      });
+      })&& logger.error({status:500, message: "Cập nhật thông tin người dùng thất bại", data: req.params, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
     }
 
     // Trả về kết quả thành công
@@ -506,14 +430,14 @@ if (!acceptedFormats.includes(dimensions.type.toLowerCase())) {
       data: updateUserAvatar,
       code: 200,
       message: "Thay đổi avatar thành công",
-    });
+    })&& logger.info({status:200, message: "Thay đổi avatar thành công", data: updateUserAvatar, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
 
   } catch (error) {
     console.error("Error during avatar upload:", error);
     return res.status(500).json({
       code: 500,
       message: "Thay đổi avatar thất bại",
-    });
+    }) && logger.error({status:500, message: "Thay đổi avatar thất bại", error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
   }
 });
 router.post("/checkToken", (req, res) => {
@@ -521,9 +445,9 @@ router.post("/checkToken", (req, res) => {
   const role = req.body.role;
   const tokenAuth = key.tokenKey;
 
-  jwt.verify(tokenAuth, token, function (err, decoded) {
-    if (err) {
-      console.error("Error during token verification:", err);
+  jwt.verify(tokenAuth, token, function (error, decoded) {
+    if (error) {
+      console.error("Error during token verification:", error);
       return res.json({
         role: role,
         message: "Error during token verification",
@@ -533,7 +457,6 @@ router.post("/checkToken", (req, res) => {
     if (decoded) {
       switch (role) {
         case "admin":
-        case "sensor":
         case "editor":
         case "journalist":
         case "customer":
@@ -555,7 +478,7 @@ router.post("/forgot-password", async (req, res) => {
       return res.status(404).json({
         code: 404,
         message: "Email không tồn tại",
-      });
+      })&& logger.warn({status:404, message: "Email không tồn tại", data: req.body , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});;
     }
     const resetToken = crypto.randomBytes(20).toString("hex");
     const resetTokenExpire = Date.now() + 300000; // Hết hạn sau 5 phút
@@ -577,7 +500,7 @@ router.post("/forgot-password", async (req, res) => {
       from: "tienanhbghd@gmail.com",
       to: user.email,
       subject: "Đặt lại mật khẩu",
-      text: `Để đặt lại mật khẩu, vui lòng truy cập liên kết sau: http://your-app/reset-password/${resetToken}`,
+      text: `Để đặt lại mật khẩu, vui lòng truy cập liên kết sau: http://ddtienanh.fun/reset-password/${resetToken}`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -586,20 +509,20 @@ router.post("/forgot-password", async (req, res) => {
         return res.status(500).json({
           code: 500,
           message: "Gửi email thất bại",
-        });
+        }) && logger.error({status:500, message: "Gửi email thất bại", error });
       }
       console.log(`Email sent: ${info.response}`);
       return res.status(200).json({
         code: 200,
         message: "Email đặt lại mật khẩu đã được gửi",
-      });
+      }) && logger.info({status:200, message: "Email đặt lại mật khẩu đã được gửi", data : req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       code: 500,
       message: "Lỗi server",
-    });
+    })&& logger.error({status:500, message: "Lỗi server", error , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
   }
 });
 
@@ -619,7 +542,7 @@ router.post("/reset-password/:token", async (req, res) => {
       return res.status(400).json({
         code: 400,
         message: "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn",
-      });
+      })&& logger.warn({status:400, message: "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn", data : req.body + req.params, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
     }
 
     // Hash mật khẩu mới và cập nhật vào cơ sở dữ liệu
@@ -632,13 +555,13 @@ router.post("/reset-password/:token", async (req, res) => {
     return res.status(200).json({
       code: 200,
       message: "Mật khẩu đã được đặt lại thành công",
-    });
+    }) && logger.info({status:200, message: "Mật khẩu đã được đặt lại thành công", data : user , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});;
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       code: 500,
       message: "Lỗi server",
-    });
+    })&& logger.error({status:500, message: "Lỗi server", error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack  });
   }
 });
 

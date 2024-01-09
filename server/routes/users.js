@@ -2,24 +2,12 @@ var express = require("express");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 const authenticateToken = require("../utils/authenticateToken");
-
+const authAdmin = require("../middleware/checkAdmin");
+const logger = require("../utils/logger");
 var router = express.Router();
 
 // Models
 const UserModel = require("../models/User");
-
-const isAdmin = async (req, res, next) => {
-  const user = req.user;
-  const id = user._id;
-  const checkUser = await UserModel.findOne({ _id: id });
-  if (!checkUser || checkUser.role !== "admin") {
-    return res.status(403).json({
-      code: 403,
-      message: "Bạn không có quyền truy cập",
-    });
-  }
-  next();
-};
 
 /* GET users listing. */
 // // Middleware kiểm tra vai trò admin
@@ -42,30 +30,28 @@ router.get("/", async (req, res, next) => {
     res.json({
       code: 200,
       data: users,
-    });
+    }) && logger.info({status:200, message: "Lấy danh sách thành viên thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
   } catch (error) {
     res.status(500).json({
       code: 500,
       error: TypeError,
-    });
+    })&& logger.error({status:500, message: error.message , error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
   }
 });
 
 /* GET channel. */
 router.get("/channels", async (req, res, next) => {
   const users = await UserModel.find({ role: "journalist" })
-
-
   try {
     res.json({
       code: 200,
       data: users,
-    });
+    })&& logger.info({status:200, message: "Lấy danh sách nhà báo thành công",url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
   } catch (error) {
     res.json({
       code: 500,
       error: TypeError,
-    });
+    })&& logger.error({status:500, message: error.message, error ,stack: error.stack, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});;
   }
 });
 
@@ -90,25 +76,25 @@ router.post(
             code: 200,
             message: "Thao tác thành công",
             data: users,
-          });
+          })&& logger.info({status:200, message: "Đã vô hiệu hóa/mở khóa tài khoản " +req.params.id , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers  });
         } else {
           res.status(500).json({
             code: 500,
             message: "Khóa tài khoản thất bại",
-          });
+          }) && logger.warn({status:500, message: "Khóa tài khoản thất bại " +req.params.id , data: lockUser , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
         }
       } else {
         res.status(404).json({
           code: 404,
           message: "Người dùng không tồn tại",
-        });
+        }) && logger.warn({status:404, message: "Người dùng không tồn tại" +req.params.id , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});;
       }
     } catch (error) {
       res.json({
         code: 500,
         message: "Khóa tài khoản thất bại",
         error: TypeError,
-      });
+      }) && logger.error({status:500, message: "Khóa tài khoản thất bại " +req.params.id, error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});;
     }
   }
 );
@@ -134,14 +120,14 @@ router.put(
           code: 200,
           message: "Thay đổi vai trò thành công",
           data: users,
-        });
+        })&& logger.info({status:200, message: "Thay đổi vai trò thành công" +req.params.id, data : userRole , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
       }
     } catch (error) {
       res.json({
         code: 500,
         message: "Thay đổi vai trò thất bại",
         error: error,
-      });
+      })&& logger.error({status:500, message: "Thay đổi vai trò thất bại", error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });;
     }
   }
 );
@@ -156,7 +142,7 @@ router.post("/delete/:id", async function(req, res, next) {
         code: 400,
         message: "Invalid user ID format",
         data: null,
-      });
+      })&& logger.warn({status:400, message: "Invalid user ID format" , data : userId , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
 
     const userDelete = await UserModel.deleteOne({ _id: new ObjectId(userId) });
@@ -168,14 +154,14 @@ router.post("/delete/:id", async function(req, res, next) {
         code: 200,
         message: "Xóa tài khoản thành công",
         data: users,
-      });
+      })&& logger.info({status:200, message: "Xóa tài khoản thành công" , data : userId, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, });
     } else {
       // Xử lý khi không xóa được và trả về phản hồi
       res.status(404).json({
         code: 404,
         message: "Không tìm thấy tài khoản để xóa",
         data: null,
-      });
+      }) && logger.warn({status:404, message: "Không tìm thấy tài khoản để xóa" , data : userId , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});;
     }
   } catch (err) {
     // Xử lý lỗi và trả về phản hồi lỗi
@@ -184,7 +170,7 @@ router.post("/delete/:id", async function(req, res, next) {
       code: 500,
       message: "Lỗi nội bộ máy chủ",
       data: null,
-    });
+    })&& logger.error({status:500, message: "Lỗi nội bộ máy chủ", err , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers,stack: err.stack});
   }
 });
 
@@ -193,24 +179,24 @@ router.post("/delete/:id", async function(req, res, next) {
 router.get("/name/:id", async (req, res, next) => {
   try {
     const user = await UserModel.findOne({ _id: req.params.id });
-
+    
     if (user) {
       res.json({
         code: 200,
         data: user,
-      });
+      })&& logger.info({status:200, message: "Lấy thông tin tài khoản thành công", data : user , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});;
     } else {
       res.status(404).json({
         code: 404,
         message: "Người dùng không tồn tại",
-      });
+      }) && logger.warn({status:404, message: "Người dùng không tồn tại", data : req.params, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
     }
   } catch (error) {
     res.status(500).json({
       code: 500,
       message: "Lỗi khi lấy thông tin người dùng",
       error: error.message,
-    });
+    })&& logger.error({status:500, message: "Lỗi khi lấy thông tin người dùng", error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
   }
 });
 

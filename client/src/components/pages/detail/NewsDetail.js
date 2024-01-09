@@ -138,14 +138,14 @@ export default function NewsDetail(props) {
   <>
     <div className="border border-secondary my-4" style={{ overflow: "hidden" }}>
 
-      <img
+      {/* <img
         src={
           datas.originalLink !== ""
             ? datas.articlePicture
             : `/uploads/news/${datas.articlePicture}`
         }
         alt={datas.title}
-      />
+      /> */}
       {/* Other content related to the image */}
       
     </div>

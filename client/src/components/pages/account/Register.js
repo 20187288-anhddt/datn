@@ -68,13 +68,13 @@ export default function Register({ history }) {
                 <div className="form-group">
                   <input
                     type="text"
-                    name="userName"
-                    style={{ border: `${errors.userName ? "1px solid red" : ""}` }}
+                    name="username"
+                    style={{ border: `${errors.username ? "1px solid red" : ""}` }}
                     className="form-control"
                     placeholder="Nhập username (họ tên) của bạn"
                     ref={register({ required: true })}
                   />
-                  {errors.userName && (
+                  {errors.username && (
                     <small className="text-danger">Phải phải nhập đầy đủ thông tin</small>
                   )}
                 </div>

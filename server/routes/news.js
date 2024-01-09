@@ -15,6 +15,7 @@ const axios = require("axios");
 const moment = require("moment");
 const dotenv = require("dotenv");
 const OpenAI = require( "openai");
+const logger = require("../utils/logger")
 
 const openai = new OpenAI({
   apiKey: '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',
@@ -65,16 +66,16 @@ router.get("/trash", async function (req, res, next) {
 
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: News,
-    });
-  } catch (err) {
-    console.log(err);
+    }) && logger.info({status:200, message: "Lấy danh sách bài viết trash thành công" , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
+  } catch (error) {
+    console.log(error);
     return res.json({
       code: 400,
-      err: err.messege,
+      error: error.messege,
       data: null,
-    });
+    }) && logger.error({status:400, message: error.messege, error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
   }
 });
 
@@ -89,15 +90,15 @@ router.get("/newsEntertainments", async function (req, res, next) {
 
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: News,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message: "Lấy danh sách tin tức giải trí thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err.messege,
+      error: error.messege,
       data: null,
-    });
+    }) && logger.error({status:400, message: error.messege, error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});;
   }
 });
 
@@ -109,9 +110,9 @@ router.get("/newsReels", async function (req, res, next) {
     if (!newsId) {
       return res.status(400).json({
         code: 400,
-        err: "Missing 'newsId' parameter",
+        error: "Missing 'newsId' parameter",
         data: null,
-      });
+      }) && logger.error({status:400, message: "Missing 'newsId' parameter", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers  });
     }
 
     // Tiếp tục xử lý với newsId hợp lệ
@@ -122,15 +123,15 @@ router.get("/newsReels", async function (req, res, next) {
 
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: News,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message: "Lấy danh sách tin tức thời sự thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
+  } catch (error) {
     return res.status(500).json({
       code: 500,
-      err: err.message,
+      error: error.message,
       data: null,
-    });
+    }) && logger.error({status:500, message: error.message,error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers , stack: error.stack });
   }
 });
 
@@ -142,7 +143,7 @@ router.get("/newsReels", async function (req, res, next) {
 //     if (!textSearch || textSearch.trim() === "") {
 //       return res.status(400).json({
 //         code: 400,
-//         err: "Invalid or missing 'textSearch' parameter",
+//         error: "Invalid or missing 'textSearch' parameter",
 //         data: null,
 //       });
 //     }
@@ -158,14 +159,14 @@ router.get("/newsReels", async function (req, res, next) {
 //     if (News) {
 //       return res.json({
 //         code: 200,
-//         err: null,
+//         error: null,
 //         data: News,
 //       });
 //     }
-//   } catch (err) {
+//   } catch (error) {
 //     return res.status(500).json({
 //       code: 500,
-//       err: err.message,
+//       error: error.message,
 //       data: null,
 //     });
 //   }
@@ -179,21 +180,15 @@ router.get("/q", async function (req, res, next) {
     if (!textSearch || textSearch.trim() === "") {
       return res.status(400).json({
         code: 400,
-        err: "Vui lòng nhập 'textSearch' parameter",
+        error: "Vui lòng nhập 'textSearch' parameter",
         data: null,
-      });
+      }) && logger.warn({status:400, message: "Vui lòng nhập 'textSearch' parameter", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
     }
 
     const newsData = await NewsModel.find({
-      $or: [
-        { title: { $regex: textSearch, $options: "i" } },
-        { sapo: { $regex: textSearch, $options: "i" } },
-        { content: { $regex: textSearch, $options: "i" } },
-      ],
       isDelete: false,
       status: "published",
     })
-      .limit(30)
       .sort({ view: -1, dateCreate: -1 });
 
     // Chuyển đổi dữ liệu tin tức sang định dạng mà fuse.js yêu cầu
@@ -206,15 +201,15 @@ router.get("/q", async function (req, res, next) {
     const searchResult = fuse.search(textSearch);
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: searchResult,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message: "Tìm kiếm thành công từ khóa: " + textSearch, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
+  } catch (error) {
     return res.status(500).json({
       code: 500,
-      err: err.message,
+      error: error.message,
       data: null,
-    });
+    }) && logger.error({status:500, message: error.message,error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
   }
 });
 
@@ -229,15 +224,15 @@ router.get("/latestNews", async function (req, res, next) {
 
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: News,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message: "Lấy danh sách tin tức mới nhất thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err.messege,
+      error: error.messege,
       data: null,
-    });
+    }) && logger.error({status:400, message: error.message,error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers , stack: error.stack});
   }
 });
 
@@ -255,20 +250,20 @@ router.get("/latestNews", async function (req, res, next) {
 //     if (articles.length === 0) {
 //       return res.json({
 //         code: 200,
-//         err: null,
+//         error: null,
 //         data: [],
 //       });
 //     }
 
 //     return res.json({
 //       code: 200,
-//       err: null,
+//       error: null,
 //       data: articles,
 //     });
-//   } catch (err) {
+//   } catch (error) {
 //     return res.json({
 //       code: 400,
-//       err: err.message,
+//       error: error.message,
 //       data: null,
 //     });
 //   }
@@ -296,15 +291,15 @@ router.get("/featuredNews", async function (req, res, next) {
 
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: featuredNews,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message: "Lấy danh sách tin tức featuredNews thành công ", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err.message,
+      error: error.message,
       data: null,
-    });
+    }) && logger.warn({status:400, message: error.message, error,url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers , stack: error.stack});;
   }
 });
 
@@ -346,15 +341,15 @@ router.get("/other", async function (req, res, next) {
 
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: combinedNews,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message: "Lấy danh sách tin tức news other thành công ", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err.messege,
+      error: error.messege,
       data: null,
-    });
+    }) && logger.warn({status:400, message: error.messege, error,url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers , stack: error.stack});
   }
 });
 
@@ -383,16 +378,16 @@ router.get("/newsForYou", async function (req, res, next) {
 
       return res.json({
         code: 200,
-        err: null,
+        error: null,
         data: getNewsUserFollow,
-      });
+      }) && logger.info({status:200, message: "Lấy danh sách tin tức newsForYou thành công ", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});;
     }
-  } catch (err) {
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err.messege,
+      error: error.messege,
       data: null,
-    });
+    }) && logger.warn({status:200, message: error.messege, error,url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
   }
 });
 
@@ -406,15 +401,15 @@ router.get("/published", async function (req, res, next) {
 
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: News,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message: "Lấy danh sách bài viết published thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err.messege,
+      error: error.messege,
       data: null,
-    });
+    }) && logger.warn({status:400, message: error.message, error,url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers , stack: error.stack});
   }
 });
 
@@ -430,15 +425,15 @@ router.get("/:id", async function (req, res, next) {
       .populate("createdBy");
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: News,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message: "Lấy danh sách bài viết ( isDelete = false ) by id user thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err.messege,
+      error: error.messege,
       data: null,
-    });
+    }) && logger.warn({status:400, message: error.message, error,url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
   }
 });
 
@@ -451,15 +446,15 @@ router.get("/new/:id", async function (req, res, next) {
       .populate("createdBy");
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: News,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message: "Lấy bài viết cần edit thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err.messege,
+      error: error.messege,
       data: null,
-    });
+    }) && logger.warn({status:400, message: error.message, error,url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers , stack: error.stack});
   }
 });
 
@@ -475,15 +470,15 @@ router.get("/trash/:id", async function (req, res, next) {
       .populate("createdBy");
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: News,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message: "Lấy bài viết news ( isDelete = true ) thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err.messege,
+      error: error.messege,
       data: null,
-    });
+    }) && logger.warn({status:400, message: error.message, error,url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers , stack: error.stack});;
   }
 });
 
@@ -497,7 +492,7 @@ router.get("/categories/:id", async function (req, res, next) {
     const news = await NewsModel.find({
       status: "published",
       cateNews: categoryId,
-    })
+    }).sort({ dateCreate: -1 })
       .populate("cateNews")
       .populate("createdBy");
 
@@ -506,14 +501,14 @@ router.get("/categories/:id", async function (req, res, next) {
       code: 200,
       error: null,
       data: news,
-    });
+    }) &&  logger.info({status:200, message: "Lấy bài viết theo thể loại ( status = published ) thành công theo " + categoryId, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
   } catch (error) {
     // Trả về thông báo lỗi chi tiết hơn
     return res.status(400).json({
       code: 400,
       error: `Lỗi khi lấy tin tức: ${error.message}`,
       data: null,
-    });
+    }) && logger.warn({status:400, message: error.message, error,url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });;
   }
 });
 
@@ -535,14 +530,14 @@ router.get("/categories/new/:id", async function (req, res, next) {
       code: 200,
       error: null,
       data: news,
-    });
+    }) && logger.info({status:200, message: "Lấy bài viết news bởi category( status = published ) thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
   } catch (error) {
     // Trả về thông báo lỗi chi tiết hơn
     return res.status(400).json({
       code: 400,
       error: `Lỗi khi lấy tin tức: ${error.message}`,
       data: null,
-    });
+    }) && logger.warn({status:400, message: error.message,error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
   }
 });
 
@@ -566,14 +561,14 @@ router.get("/subCategories/:id", async function (req, res, next) {
       code: 200,
       error: null,
       data: news,
-    });
+    }) && logger.info({status:200, message: "Lấy tin tức của subCateNews thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
   } catch (error) {
     // Trả về thông báo lỗi chi tiết hơn
     return res.status(400).json({
       code: 400,
       error: `Lỗi khi lấy tin tức: ${error.message}`,
       data: null,
-    });
+    }) && logger.warn({status:400, message: "Lấy tin tức của subCateNews thất bại " +error.message, error,url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});
   }
 });
 
@@ -591,15 +586,15 @@ router.get("/users/:id", async function (req, res, next) {
 
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: News,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message: "Lấy tin tức của users ( status = published ) channel thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err.message,
+      error: error.message,
       data: null,
-    });
+    }) && logger.warn({status:400, message: "Lấy tin tức của users ( status = published ) channel thất bại",error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});;
   }
 });
 
@@ -618,15 +613,15 @@ router.get("/similar/:id", async function (req, res, next) {
 
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: News,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message: "Lấy tin tức của tương tự cateNews thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err.messege,
+      error: error.messege,
       data: null,
-    });
+    }) && logger.warn({status:400, message: "Lấy tin tức tương tự cateNews thất bại" + error.message, error,url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});
   }
 });
 
@@ -646,9 +641,9 @@ router.get("/:_idNews", async function (req, res, next) {
     if (!news || news.isDelete) {
       return res.json({
         code: 404,
-        err: "Không tìm thấy tin tức",
+        error: "Không tìm thấy tin tức",
         data: null,
-      });
+      }) && logger.warn({status:404, message: "Không tìm thấy tin tức" + idNews, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});;
     }
 
     // Chuẩn bị dữ liệu trả về
@@ -665,15 +660,15 @@ router.get("/:_idNews", async function (req, res, next) {
 
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: data,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message: "Lấy dữ liệu thành công tin tức" + idNews, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err.message,
+      error: error.message,
       data: null,
-    });
+    }) && logger.error({status:400, message: error.message, error,url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});
   }
 });
 
@@ -689,14 +684,11 @@ router.get("/details/:_idNews", async function (req, res, next) {
     if (News.length === 0) {
       return res.json({
         code: 200,
-        err: null,
+        error: null,
         data: [null],
       });
     }
     const newsItem = News[0];
-
-
-
 
     // Kiểm tra xem content có giá trị rỗng hay không
     if (
@@ -711,9 +703,6 @@ router.get("/details/:_idNews", async function (req, res, next) {
 
         // Sử dụng cheerio để load mã HTML
         const $ = cheerio.load(html);
-        // $('img').removeAttr('src');
-        // $('img').removeAttr('imgid');
-        // $('img').attr('src', $('img').attr('data-src'));
 
         // Duyệt qua từng thẻ img và thực hiện thay đổi
         $('img').each((index, element) => {
@@ -769,6 +758,7 @@ router.get("/details/:_idNews", async function (req, res, next) {
         );
       } catch (error) {
         console.error("Error fetching HTML:", error);
+        logger.error({ message: "Error fetching HTML:", error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});
       }
     }
 
@@ -836,6 +826,8 @@ router.get("/details/:_idNews", async function (req, res, next) {
         );
       } catch (error) {
         console.error("Error fetching HTML:", error);
+        logger.error({ message: "Error fetching HTML:", error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});
+        
       }
     }
 
@@ -887,6 +879,7 @@ router.get("/details/:_idNews", async function (req, res, next) {
         );
       } catch (error) {
         console.error("Error fetching HTML:", error);
+        logger.error({ message: "Error fetching HTML:", error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});
       }
     }
 
@@ -938,9 +931,10 @@ router.get("/details/:_idNews", async function (req, res, next) {
         );
       } catch (error) {
         console.error("Error fetching HTML:", error);
+        logger.error({ message: "Error fetching HTML:", error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});
       }
     }
-
+    
     
     const NewsUpdate = await NewsModel.find({
       _id: idNews,
@@ -949,15 +943,15 @@ router.get("/details/:_idNews", async function (req, res, next) {
     // Trả về dữ liệu
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: NewsUpdate,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message: "Cập nhật nội dung content tin tức thành công" + idNews, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err.message,
+      error: error.message,
       data: null,
-    });
+    }) && logger.warn({status:400, message: error.message , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});;
   }
 });
 // add news
@@ -1003,7 +997,7 @@ router.put("/:_id", async function (req, res, next) {
         return res.json({
           code: 200,
           message: "Sửa bài viết thành công",
-        });
+        })&& logger.info({status:200, message : "Sửa bài viết thành công"+ _id , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});
       } else {
         const news = {
           title: body.title,
@@ -1022,17 +1016,17 @@ router.put("/:_id", async function (req, res, next) {
         return res.json({
           code: 200,
           message: "Sửa bài viết thành công",
-        });
+        })  && logger.info({status:200, message : "Sửa bài viết thành công"+ _id , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
       }
     }
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     return res.json({
       code: 400,
       message: "Sửa bài viết thất bại",
-      err: err,
+      error: error,
       data: null,
-    });
+    })&&  logger.error({status:400, message : "Sửa bài viết thất bại"+ _id,error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers , stack: error.stack});
   }
 });
 
@@ -1050,7 +1044,8 @@ async function tomtatWithChatGPT(content) {
     const summarizedContent = completion.choices[0].message.content;
     return { summarizedContent, message: completion.choices[0].message };
   } catch (error) {
-    console.error(error);
+    console.error(error); 
+    logger.error({status:error.response.status, message : error,error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers , stack: error.stack})
     throw new Error("Lỗi khi tóm tắt nội dung");
   }
 }
@@ -1084,7 +1079,7 @@ router.post("/crawled_news", async function (req, res, next) {
         code: 200,
         message: "Update thành công bài báo " + body.title,
         data: newsClass,
-      });
+      }) && logger.info({status:200, message : "Update thành công bài báo " + req.body.title , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
 
     const News = new NewsModel({
@@ -1107,13 +1102,13 @@ router.post("/crawled_news", async function (req, res, next) {
       code: 200,
       message: "Gửi yêu cầu thành công",
       data: NewsClass,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message : "Gửi yêu cầu thành công " + body.title, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err,
+      error: error,
       message: "Thêm thất bại",
-    });
+    }) && logger.warn({status:400, message : "Thêm thất bại " + body.title ,error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});
   }
 });
 
@@ -1123,12 +1118,12 @@ router.post("/upload", function (req, res, next) {
     const file = req.files.upload;
 
     file.mv(`${__dirname}/../../client/public/uploads/news/${file.name}`);
-  } catch (err) {
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err,
+      error: error,
       message: "Upload thất bại",
-    });
+    })&& logger.warn({status:400, message :"Upload ảnh thất bại", error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
   }
 });
 
@@ -1161,14 +1156,14 @@ try {
     code: 200,
     message: "Gửi yêu cầu thành công",
     data: NewsClass
-  });
+  }) && logger.info({status:200, message :"Gửi yêu cầu thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
 
-} catch (err) {
+} catch (error) {
   return res.json({
     code: 400,
-    err: err,
+    error: error,
     message: "Thêm thất bại"
-  });
+  })&& logger.warn({status:400, message :"Gửi yêu cầu thất bại",error: error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
 }
 });
 
@@ -1195,15 +1190,15 @@ router.put("/views/:_id", async function (req, res, next) {
         res.json({
           code: 200,
           data: news,
-        });
+        }) && logger.info({status:200, message :"Tăng view thành công cho bài" + _id, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
       }
     }
-  } catch (err) {
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err,
+      error: error,
       data: null,
-    });
+    }) && logger.error({status:400, message :error ,error,  url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers , stack: error.stack});
   }
 });
 
@@ -1225,16 +1220,16 @@ router.put("/giveUpDraft/:_id", async function (req, res, next) {
           code: 200,
           message: "Bỏ nháp thành công",
           data: news,
-        });
+        }) && logger.info({status:200, message :"Bỏ nháp thành công"+ _id , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
       }
     }
-  } catch (err) {
+  } catch (error) {
     return res.json({
       code: 400,
       message: "Bỏ nháp thất bại",
-      err: err,
+      error: error,
       data: null,
-    });
+    })&& logger.warn({status:400, message :"Bỏ nháp thất bại", error,url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers , stack: error.stack});
   }
 });
 
@@ -1256,16 +1251,16 @@ router.put("/saveDraft/:_id", async function (req, res, next) {
           code: 200,
           message: "Lưu nháp thành công",
           data: news,
-        });
+        }) && logger.info({status:200, message :"Lưu nháp thành công"+ _id, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
       }
     }
-  } catch (err) {
+  } catch (error) {
     return res.json({
       code: 400,
       message: "Lưu nháp thất bại",
-      err: err,
+      error: error,
       data: null,
-    });
+    }) && logger.warn({status:400, message :"Lưu nháp thất bại", error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });;
   }
 });
 
@@ -1287,16 +1282,16 @@ router.put("/trash/:_id", async function (req, res, next) {
           code: 200,
           message: "Đã thêm vào giỏ rác",
           data: news,
-        });
+        }) && logger.info({status:200, message :"Đã thêm vào giỏ rác" + _id, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
       }
     }
-  } catch (err) {
+  } catch (error) {
     return res.json({
       code: 400,
       message: "Thêm vào giỏ rác thất bại",
-      err: err,
+      error: error,
       data: null,
-    });
+    })&& logger.warn({status:400, message :"Thêm vào giỏ rác thất bại" + _id, error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
   }
 });
 
@@ -1320,16 +1315,16 @@ router.put("/restore/:_id", async function (req, res, next) {
           code: 200,
           message: "Restore thành công",
           data: news,
-        });
+        })&& logger.info({status:200, message :"Restore thành công" + _id, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
       }
     }
-  } catch (err) {
+  } catch (error) {
     return res.json({
       code: 400,
       message: "Restore thất bại",
-      err: err,
+      error: error,
       data: null,
-    });
+    })&& logger.warn({status:400, message :"Restore thất bại" + _id, error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });;
   }
 });
 
@@ -1349,16 +1344,16 @@ router.delete("/:_id", async function (req, res, next) {
           code: 200,
           message: "Xóa thành công",
           data: news,
-        });
+        }) && logger.info({status:200, message :"Xóa thành công" + _id , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
       }
     }
-  } catch (err) {
+  } catch (error) {
     return res.json({
       code: 400,
       message: "Xóa thất bại",
-      err: err,
+      error: error,
       data: null,
-    });
+    }) &&  logger.warn({status:400, message :"Xóa thất bại",  error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
   }
 });
 
@@ -1371,15 +1366,15 @@ router.get("/favorite", auth, async function (req, res, next) {
     const postFav = await NewsModel.find({ _id: postLike.News });
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: postFav,
-    });
-  } catch (err) {
+    }) && logger.info({status:200, message :"Thêm vào yêu thích thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err,
+      error: error,
       data: null,
-    });
+    }) && logger.error({status:400, error,url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});
   }
 });
 
@@ -1390,15 +1385,15 @@ router.get("/bestNews", auth, async function (req, res, next) {
     });
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: Newss,
-    });
-  } catch (err) {
+    })&& logger.info({status:200, message :"Lấy danh sách tin tức bestNews thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err,
+      error: error,
       data: null,
-    });
+    }) && logger.error({status:400, error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers,stack: error.stack});
   }
 });
 
@@ -1411,13 +1406,13 @@ router.get("/", async function (req, res, next) {
       News.reverse();
     return res.json({
       code: 200,
-      err: null,
+      error: null,
       data: News,
     });
-  } catch (err) {
+  } catch (error) {
     return res.json({
       code: 400,
-      err: err.messege,
+      error: error.messege,
       data: null,
     });
   }

@@ -4,7 +4,7 @@ const ViewModel = require("../models/View");
 const StatisticModel = require("../models/Statistical");
 const NewsModel = require("../models/News");
 const CateNewsModel = require("../models/CateNews");
-
+const logger = require("../utils/logger")
 const moment = require("moment");
 let timedate = moment().format();
 const router = express.Router();
@@ -42,8 +42,8 @@ router.post("/news", async (req, res) => {
       // Nếu thiếu thông tin cần thiết, trả về lỗi
       return res.status(400).json({
         code: 400,
-        err: "Thiếu thông tin cần thiết.",
-      });
+        error: "Thiếu thông tin cần thiết.",
+      })&& logger.warn({status:400, message: "Thiếu thông tin cần thiết",data: req.body, error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
 
     // Kiểm tra xem tin tức đã được xem trong ngày chưa
@@ -59,7 +59,7 @@ router.post("/news", async (req, res) => {
         code: 200,
         message: "Tin tức đã được xem trong ngày.",
         data: existingView,
-      });
+      })&& logger.info({status:200, message:"Tin tức đã được xem trong ngày",data: req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
 
     // Nếu chưa xem, tạo một bản ghi mới
@@ -76,7 +76,7 @@ router.post("/news", async (req, res) => {
         code: 200,
         message: "Thêm lượt xem cho tin tức thành công.",
         data: newsViews,
-      });
+      })&& logger.info({status:200, message:"Thêm lượt xem cho tin tức thành công.",data: saveNewsViews, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
   } catch (error) {
     // Xử lý lỗi và trả về thông báo lỗi
@@ -86,7 +86,7 @@ router.post("/news", async (req, res) => {
       message: "Đã xảy ra lỗi khi thêm lượt xem cho tin tức.",
       error: error.message || "Lỗi không xác định",
       data: null,
-    });
+    })&& logger.error({status:500, message:"Đã xảy ra lỗi khi thêm lượt xem cho tin tức.",error, data: saveNewsViews, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});;
   }
 });
 
@@ -104,7 +104,7 @@ router.get('/viewsOfDay', async (req, res) => {
       code: 200,
       message: "Lấy tin tức đã xem trong ngày thành công",
       data: news,
-    });
+    })&& logger.info({status:200, message:"Lấy tin tức đã xem trong ngày thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
   } catch (error) {
     console.error(error);
 
@@ -113,7 +113,7 @@ router.get('/viewsOfDay', async (req, res) => {
       message: "Đã xảy ra lỗi khi lấy tin tức đã xem trong ngày",
       error: error.message || "Lỗi không xác định",
       data: null,
-    });
+    })&& logger.error({status:500, message:"Đã xảy ra lỗi khi lấy tin tức đã xem trong ngày", error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});
   }
 });
 
@@ -149,7 +149,7 @@ router.get("/viewsOfMonth", async (req, res) => {
       code: 200,
       message: "Lấy tin tức đã xem trong tháng thành công",
       data: viewToMonth,
-    });
+    })&& logger.info({status:200, message:"Lấy tin tức đã xem trong tháng thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
   } catch (err) {
     console.error(err);
     return res.status(500).json({
@@ -157,7 +157,7 @@ router.get("/viewsOfMonth", async (req, res) => {
       message: "Đã xảy ra lỗi khi lấy tin tức đã xem trong tháng",
       error: err.message || "Lỗi không xác định",
       data: null,
-    });
+    }) && logger.error({status:500, message:"Đã xảy ra lỗi khi lấy tin tức đã xem trong tháng", error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers,  stack: error.stack})
   }
 });
 

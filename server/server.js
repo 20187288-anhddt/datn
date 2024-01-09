@@ -51,7 +51,8 @@ const connectMongoDB = async () => {
     });
     console.log("Kết nối tới mongoDB thành công!");
   } catch (error) {
-    console.error("connect MongoDB has error: " + error);
+    console.error("connect MongoDB has error: " + error)
+    && logger.error({status:400, message:"connect MongoDB has error: " + error , url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack : err.stack});;
   }
 };
 connectMongoDB();
@@ -68,13 +69,14 @@ app.use("/statisticals", statisticalRouter);
 app.use("/followers", followersRouter);
 app.use("/comments", commentRouter);
 
+const port = process.env.PORT || 3333;
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static("client/build"));
+  app.listen(port, () => console.log(`Server started at port: ${port}`));
+  // app.use(express.static("client/build"));
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
-  });
+  // app.get("*", (req, res) => {
+  //   res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+  // });
 }
 
-const port = process.env.PORT || 3333;
 app.listen(port, () => console.log(`Server started at port: ${port}`));

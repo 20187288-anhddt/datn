@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const logger = require("../utils/logger")
 const FollowerModel = require("../models/Follow");
 const UserModel = require("../models/User");
 
@@ -24,7 +24,7 @@ router.get("/", async (req, res) => {
         code: 200,
         data: [],
         message: "Không có người theo dõi nào được tìm thấy"
-      });
+      })&& logger.info({status:200, message:"Không có người theo dõi nào được tìm thấy", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
 
     // Trả về dữ liệu người theo dõi thành công
@@ -32,9 +32,10 @@ router.get("/", async (req, res) => {
       code: 200,
       data: followers
     });
-  } catch (e) {
+  } catch (error) {
     // Xử lý lỗi khi truy vấn
-    handleRouteError(res, e, "Lỗi khi truy vấn người theo dõi");
+    handleRouteError(res, error, "Lỗi khi truy vấn người theo dõi");
+    logger.error({status:500, message:"Lỗi khi truy vấn người theo dõi", error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});
   }
 });
 
@@ -47,7 +48,7 @@ router.post("/", async (req, res) => {
       return res.status(400).json({
         code: 400,
         message: "Dữ liệu đầu vào không hợp lệ",
-      });
+      })&& logger.warn({status:400, message:"Dữ liệu đầu vào không hợp lệ",data: req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
 
     // Kiểm tra xem mối quan hệ theo dõi đã tồn tại chưa
@@ -57,7 +58,7 @@ router.post("/", async (req, res) => {
       return res.status(400).json({
         code: 400,
         message: "Mối quan hệ theo dõi đã tồn tại",
-      });
+      })&& logger.warn({status:400, message:"Mối quan hệ theo dõi đã tồn tại",data: req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
 
     // Tạo mối quan hệ theo dõi mới
@@ -74,16 +75,17 @@ router.post("/", async (req, res) => {
       return res.status(200).json({
         code: 200,
         message: "Following",
-      });
+      })&& logger.info({status:200, message:"Following",data: saveFollower, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     } else {
       return res.status(500).json({
         code: 500,
-        message: "Đã xảy ra lỗi khi tạo mối quan hệ",
-      });
+        message: "Đã xảy ra lỗi khi tạo follow",
+      })&& logger.warn({status:500, message:"Đã xảy ra lỗi khi tạo follow",data: req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
-  } catch (e) {
+  } catch (error) {
     // Xử lý lỗi khi thực hiện thêm mối quan hệ
-    handleRouteError(res, e, "Lỗi khi thêm mối quan hệ theo dõi");
+    handleRouteError(res, error, "Lỗi khi thêm mối quan hệ theo dõi");
+    logger.error({status:500, message:"Lỗi khi thêm mối quan hệ theo dõi",error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack})
   }
 });
 
@@ -99,7 +101,7 @@ router.put("/increase/:id", async (req, res) => {
         code: 404,
         message: "Người dùng không tồn tại",
         data: null,
-      });
+      })&& logger.warn({status:404, message:"Người dùng không tồn tại",data: req.params, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
 
     const body = req.body;
@@ -115,10 +117,11 @@ router.put("/increase/:id", async (req, res) => {
       code: 200,
       message: "Theo dõi thành công",
       data: followers,
-    });
-  } catch (err) {
+    })&& logger.info({status:200, message:"Theo dõi thành công",data: req.params, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
+  } catch (error) {
     // Xử lý trường hợp lỗi và trả về phản hồi chi tiết
-    handleRouteError(res, err, "Lỗi khi cập nhật theo dõi");
+    handleRouteError(res, error, "Lỗi khi cập nhật theo dõi");
+    logger.error({status:500, message:"Lỗi khi thêm mối quan hệ theo dõi",error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack})
   }
 });
 
@@ -133,7 +136,8 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({
         code: 404,
         message: "Mối quan hệ theo dõi không tồn tại",
-      });
+      })
+     && logger.warn({status:404, message:"Mối quan hệ theo dõi không tồn tại",data: req.params, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
 
     // Xóa mối quan hệ theo dõi
@@ -143,10 +147,11 @@ router.delete("/:id", async (req, res) => {
     return res.status(200).json({
       code: 200,
       message: "Hủy theo dõi thành công",
-    });
-  } catch (e) {
+    }) && logger.info({status:200, message:"Hủy theo dõi thành công",data: req.params, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
+  } catch (error) {
     // Xử lý trường hợp lỗi và trả về phản hồi chi tiết
-    handleRouteError(res, e, "Lỗi khi hủy theo dõi");
+    handleRouteError(res, error, "Lỗi khi hủy theo dõi");
+    logger.error({status:500, message:"Lỗi khi hủy theo dõi",error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack})
   }
 });
 
@@ -162,7 +167,7 @@ router.put("/decrease/:id", async (req, res) => {
         code: 404,
         message: "Người dùng không tồn tại",
         data: null,
-      });
+      })&& logger.warn({status:404, message:"Người dùng không tồn tại",data: req.params, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});;
     }
 
     const body = req.body;
@@ -178,10 +183,11 @@ router.put("/decrease/:id", async (req, res) => {
       code: 200,
       message: "Bỏ theo dõi thành công",
       data: followers,
-    });
-  } catch (err) {
+    })&& logger.info({status:200, message:"Hủy theo dõi thành công",data: req.params, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
+  } catch (error) {
     // Xử lý trường hợp lỗi và trả về phản hồi chi tiết
-    handleRouteError(res, err, "Lỗi khi bỏ theo dõi");
+    handleRouteError(res, error, "Lỗi khi bỏ theo dõi");
+    logger.error({status:500, message:"Lỗi khi hủy theo dõi",error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack})
   }
 });
 

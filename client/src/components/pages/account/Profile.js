@@ -31,8 +31,7 @@ export default function Profile() {
 
   const dispatch = useDispatch();
   const userId = sessionStorage.getItem("userId");
-  const token = localStorage.getItem("auth-token") || "asdasd";
-
+  const token = localStorage.getItem("auth-token") || "no-token";
   useEffect(() => {
     dispatch(setMessage({ message: "" }));
     const fetchUser = async () => {

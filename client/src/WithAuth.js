@@ -7,12 +7,12 @@ export default function WithAuth(...args) {
   const ComponentJournalist = args[2];
   const ComponentEditor = args[1];
 
-  const [role, setRole] = React.useState("asdasd");
+
   const msg = "Unauthorized: Bạn không được cấp phép vào trang này.";
 
   const token = localStorage.getItem("auth-token");
   const userId = sessionStorage.getItem("userId");
-
+  const [role, setRole] = React.useState(token);
   React.useEffect(() => {
     async function fetchData() {
       if (token) {

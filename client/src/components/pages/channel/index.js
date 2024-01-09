@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
 import NewsHighlight from "./NewsHighlight";
-import OtherNews from "./NewsOther";
+import NewsOther from "./NewsOther";
 import FeaturedChannal from "../home/FeaturedChannel";
 import LatestNew from "../home/LatestNew";
 
@@ -170,7 +170,7 @@ fetchDataNews();
           <div className="row">
             <div className="col-lg-8">
               <NewsHighlight highlightNew={highlightNew || null} />
-              <OtherNews
+              <NewsOther
                 tags={tags}
                 newByTag={newByTag}
                 newsHighlightId={highlightNew ? highlightNew._id : null}

@@ -5,7 +5,7 @@ import { getCategories } from "../../actions/category.action";
 import { addUser } from "../../actions/user.action";
 import { hanldeUrlPretty } from "../mixin/UrlPretty";
 import CheckAdmin from "./CheckAdmin";
-
+import Search from "./Search";
 export default function NavAdmin(props) {
   const appState = useSelector(state => state);
   const dispatch = useDispatch();
@@ -51,6 +51,20 @@ export default function NavAdmin(props) {
               : null}
           </ul>
         
+          <li className="nav-item dropdown">
+                <button type="button" className="btn btn-sm btn-dark btn-hover-darker" data-toggle="modal" data-target="#exampleModal">
+                  <i className="mdi mdi-magnify mdi-36px !important" />
+                </button>
+                {/* Modal */}
+                <div className="modal fade" id="exampleModal" tabIndex={-1} role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div className="modal-dialog" role="document">
+                    <div className="modal-content">
+                      <Search />
+                    </div>
+                  </div>
+                </div>
+              </li>
+
           <ul className="navbar-nav mr-auto align-items-center">
             <h5><CheckAdmin role={props.role} /></h5>
           </ul>

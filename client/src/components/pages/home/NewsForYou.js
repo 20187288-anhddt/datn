@@ -5,7 +5,7 @@ import moment from "moment";
 
 import { hanldeUrlPretty } from "../../mixin/UrlPretty";
 
-export default function NewsOther() {
+export default function NewsForYou() {
   const [news, setNews] = React.useState([]);
   const userId = sessionStorage.getItem("userId") || null;
   const token = localStorage.getItem("auth-token");

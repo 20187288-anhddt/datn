@@ -22,7 +22,13 @@ export default function Detail({ match, location }) {
 
     fetchData();
   }, [id]);
-
+  React.useEffect(() => {
+    // Check if datas.content is null or an empty string
+    if (datas.content === null || datas.content === "") {
+      // Open originalLink in a new tab
+      window.open(datas.originalLink, "_blank");
+    }
+  }, [datas]);
   return !datas
     ? <NotExistNews/> : (
         <React.Fragment>
