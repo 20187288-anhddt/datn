@@ -1,0 +1,27 @@
+filebeat.inputs:
+- type: filestream
+  enabled: true
+  paths:
+    - ./server/log/*.log
+    - /var/log/server/*.log
+    # - /var/log/nginx/*.log
+output.logstash:
+  enabled: true
+  hosts: ["logstash:5044"]
+  username: "elastic"
+  password: "tienanh138"
+
+# output.kafka:
+#   hosts: ["kafka:9092"] 
+#   topic: 'log' 
+#   partition.round_robin: 
+#     reachable_only: false 
+#   required_acks: 1 
+#   compression: gzip 
+#   max_message_bytes: 1000000
+
+setup.kibana:
+  host: "http://kibana:5601"
+  username: "elastic"
+  password: "tienanh138"
+

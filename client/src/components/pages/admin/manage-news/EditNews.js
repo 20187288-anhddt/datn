@@ -3,7 +3,7 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-
+import { useHistory } from 'react-router-dom';
 import { setMessage } from "../../../../actions/message.action";
 import Message from "../../Message";
 import { closeMessage } from "../../closeMessage";
@@ -104,6 +104,11 @@ export default function EditNews({ match }) {
     } finally {
       setLoading(false);
     }
+  };
+  const history = useHistory();
+
+  const handleGoBack = () => {
+    history.goBack(); // Điều hướng ngược về trang trước đó
   };
 
   return (
@@ -254,8 +259,11 @@ export default function EditNews({ match }) {
               />
             </div>
 
-            <button type="submit" className="btn btn-danger bety-btn ">
+            <button type="submit" className="btn btn-danger bety-btn">
               SỬA
+            </button>
+            <button type="button" onClick={handleGoBack} className="btn btn-danger bety-btn">
+              HỦY
             </button>
             {loading && (
               <div className="text-center">

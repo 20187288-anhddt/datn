@@ -589,7 +589,7 @@ router.get("/channels/follows", async (req, res) => {
     }
   } catch (error) {
     return res.json({
-      code: 400,
+      code: 401,
       err: error
     });
   }

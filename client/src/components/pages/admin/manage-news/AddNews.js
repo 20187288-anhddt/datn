@@ -202,6 +202,9 @@ export default function AddNews() {
                 style={{ border: `${errors.subCategory ? "1px solid red" : ""}` }}
                 ref={register({ required: false })}
               >
+                <option value={null} >
+                  -- Chọn thể loại con --
+                </option>
                 {subCategories.map((subCategory, index) => (
                   <option key={index} value={subCategory._id}>
                     {subCategory.name}

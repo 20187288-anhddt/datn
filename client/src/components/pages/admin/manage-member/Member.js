@@ -56,15 +56,19 @@ export default function Member() {
   // delete user
   const handleDeleteUser = async (id) => {
     const userExist = users.find(item => item._id === id);
-    if (!userExist)
-      return
-    const res = await axios.post(`/users/delete/${id}`);
-    const { code, message, data } = res.data;
-    setUsers(data);
-    setUsersData(data);
-    dispatch(setMessage({ code, message }));
-    dispatch(closeMessage());
+    if (!userExist) return;
 
+    // Hiển thị popup xác nhận
+    const isConfirmed = window.confirm("Bạn có chắc chắn muốn xóa tài khoản này không?");
+    
+    if (isConfirmed) {
+      const res = await axios.post(`/users/delete/${id}`);
+      const { code, message, data } = res.data;
+      setUsers(data);
+      setUsersData(data);
+      dispatch(setMessage({ code, message }));
+      dispatch(closeMessage());
+    }
   };
 
   // filter ROLE

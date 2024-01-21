@@ -2,14 +2,18 @@ import React, { useState } from "react";
 import { Helmet } from "react-helmet";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import axios from "axios";
 import ReCAPTCHA from "react-google-recaptcha"; // Import ReCAPTCHA
 import Message from "../Message";
+import { setMessage } from "../../../actions/message.action";
+import { closeMessage } from "../closeMessage";
 
 const ForgotPassword = () => {
   const { register, handleSubmit, errors, setValue, getValues } = useForm();
   const [message, setMessage] = useState(null);
-
+  const [errorMessage, setErrorMessage] = useState(""); // New state for error message
+  const dispatch = useDispatch();
   const onSubmit = async (data) => {
 	console.log("Form submitted with data:", data); // Add this line
   
@@ -24,13 +28,18 @@ const ForgotPassword = () => {
 	  // Continue with your existing code for forgot password
 	  const res = await axios.post("/login/forgot-password", data);
   
-	  if (res.data.code === 200) {
-		setMessage({ code: 200, message: res.data.message });
+	  if (res.data.code) {
+      dispatch(setMessage({ code: 200, message:"Gửi yêu cầu đặt lại mật khẩu thành công, vui lòng kiểm tra email" }));
+      setErrorMessage("Gửi yêu cầu đặt lại mật khẩu thành công, vui lòng kiểm tra email");
+    dispatch(closeMessage());
 	  } else {
-		setMessage({ code: res.data.code, message: res.data.message });
+      dispatch(setMessage({ code: res.data.code, message: "Gửi yêu cầu đặt lại mật khẩu thất bại" }));
+      setErrorMessage("Gửi yêu cầu đặt lại mật khẩu thất bại");
+    dispatch(closeMessage());
 	  }
 	} catch (error) {
 	  console.error("Có lỗi khi yêu cầu quên mật khẩu:", error);
+    setErrorMessage("Gửi yêu cầu đặt lại mật khẩu thành công, vui lòng kiểm tra email");
 	}
   };
   
@@ -45,7 +54,7 @@ const ForgotPassword = () => {
       <div className="container">
         <div className="row" style={{ height: "85vh" }}>
           <form className="col-xl-6 m-auto" onSubmit={handleSubmit(onSubmit)}>
-            <Message message={message} />
+            <Message />
             <h1 className="mb-4">Quên Mật Khẩu</h1>
             <div className="form-group">
               <input
@@ -64,6 +73,7 @@ const ForgotPassword = () => {
                 onChange={(value) => setValue("recaptcha", value)}
               />
             </div>
+            {errorMessage && <div className="text-danger mt-2">{errorMessage}</div>}
             <button type="submit" className="btn btn-danger mt-3">
               Gửi yêu cầu
             </button>

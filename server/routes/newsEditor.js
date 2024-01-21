@@ -14,7 +14,7 @@ router.get("/", async function(req, res, next) {
   try {
     const News = await NewsModel.find({
       isDelete: false,
-      status: NEWS.STATUS.NEW
+      status: "undefined"
     })
       .populate("cateNews")
       .populate("createdBy");
@@ -61,7 +61,7 @@ router.get("/:_idNews", authEditor, async function(req, res, next) {
   }
 });
 
-// gửi phê duyệt lên sensor
+// Published
 router.put("/:_id", async function(req, res, next) {
   try {
     const _id = req.params._id;
@@ -78,7 +78,7 @@ router.put("/:_id", async function(req, res, next) {
           title: body.title,
           content: body.content,
           cateNews: body.categoryId,
-          status: "edited",
+          status: "published",
           tag: JSON.parse(body.tags),
           articlePicture: files.file.name
         };
@@ -88,7 +88,7 @@ router.put("/:_id", async function(req, res, next) {
 
           return res.json({
             code: 200,
-            message: "Sửa bài viết và gửi yêu cầu phê duyệt thành công"
+            message: "Published thành công"
           });
         }
       } else {
@@ -96,7 +96,7 @@ router.put("/:_id", async function(req, res, next) {
           title: body.title,
           content: body.content,
           cateNews: body.categoryId,
-          status: "edited",
+          status: "published",
           tag: JSON.parse(body.tags)
         };
 
@@ -105,7 +105,7 @@ router.put("/:_id", async function(req, res, next) {
 
           return res.json({
             code: 200,
-            message: "Sửa bài viết và gửi yêu cầu phê duyệt thành công"
+            message: "Published thành công"
           });
         }
       }
@@ -114,12 +114,73 @@ router.put("/:_id", async function(req, res, next) {
     console.log(err);
     return res.json({
       code: 400,
-      message: "Sửa bài viết thất bại",
+      message: "Published thất bại",
       err: err,
       data: null
     });
   }
 });
+
+
+router.put("/unpublished/:_id", async function(req, res, next) {
+  try {
+    const _id = req.params._id;
+    const newExist = await NewsModel.findOne({ _id: _id });
+
+    if (newExist) {
+      const body = req.body;
+      const files = req.files;
+
+      if (files) {
+        files.file.mv(`${__dirname}/../../client/public/uploads/news/${files.file.name}`);
+
+        const news = {
+          title: body.title,
+          content: body.content,
+          cateNews: body.categoryId,
+          status: "unpublished",
+          tag: JSON.parse(body.tags),
+          articlePicture: files.file.name
+        };
+
+        if (news) {
+          await NewsModel.findOneAndUpdate({ _id: _id }, news);
+
+          return res.json({
+            code: 200,
+            message: "Unpublished thành công"
+          });
+        }
+      } else {
+        const news = {
+          title: body.title,
+          content: body.content,
+          cateNews: body.categoryId,
+          status: "unpublished",
+          tag: JSON.parse(body.tags)
+        };
+
+        if (news) {
+          await NewsModel.findOneAndUpdate({ _id: _id }, news);
+
+          return res.json({
+            code: 200,
+            message: "Unpublished thành công"
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    return res.json({
+      code: 400,
+      message: "Unpublished thất bại",
+      err: err,
+      data: null
+    });
+  }
+});
+
 
 router.delete("/:_id", authEditor, async function(req, res, next) {
   try {

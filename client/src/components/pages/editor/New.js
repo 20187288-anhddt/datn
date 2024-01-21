@@ -1,14 +1,14 @@
 import React from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import ReactTable from "react-table";
+import ReactTable from "react-table-6";
 import "react-table-6/react-table.css";
 import { setMessage } from "../../../actions/message.action";
 import { useDispatch } from "react-redux";
 
 import Message from "../Message";
 
-export default function News() {
+export default function New() {
   const [news, setNews] = React.useState([]);
   const [amountNews, setAmountNews] = React.useState([]);
   const dispatch = useDispatch();
@@ -16,7 +16,7 @@ export default function News() {
   React.useEffect(() => {
     dispatch(setMessage({ message: "" }));
     const fetchNews = async () => {
-      const res = await axios.get("/newsEdits");
+      const res = await axios.get("/newsEditors");
       const data = res.data.data;
 
       setNews(data);
@@ -83,7 +83,7 @@ export default function News() {
           <span className="page-title-icon bg-gradient-danger text-white mr-2">
             <i className="mdi mdi-view-list" />
           </span>
-          News needs approval
+          Tin tức cần phê duyệt
         </h3>
         <nav aria-label="breadcrumb">
           <ul className="breadcrumb">

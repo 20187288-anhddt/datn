@@ -1050,8 +1050,24 @@ async function tomtatWithChatGPT(content) {
   }
 }
 
+// async function summarizeWithChatGPT(content) {
+//   try {
+//     const completion = await openai.chat.completions.create({
+//       messages: [{ role: "system", content: "Summarize the following text in less than 30 words: " + content }],
+//       model: "gpt-3.5-turbo",
+//     });
 
+//     const summarizedContent = completion.choices[0].message.content;
+//     return { summarizedContent, message: completion.choices[0].message };
+//   } catch (error) {
+//     console.error(error); 
+//     logger.error({ status: error.response.status, message: error, error, url: req.originalUrl, 
+//       method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack });
+//     throw new Error("Error summarizing content");
+//   }
+// }
 
+// summarizeWithChatGPT()
 // add news crawler
 router.post("/crawled_news", async function (req, res, next) {
   try {
@@ -1108,7 +1124,7 @@ router.post("/crawled_news", async function (req, res, next) {
       code: 400,
       error: error,
       message: "Thêm thất bại",
-    }) && logger.warn({status:400, message : "Thêm thất bại " + body.title ,error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});
+    }) && logger.warn({status:400, message : error.message ,error, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack});
   }
 });
 

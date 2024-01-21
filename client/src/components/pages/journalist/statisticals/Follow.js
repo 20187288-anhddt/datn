@@ -1,29 +1,33 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 export default function Follow() {
-	const [ channels, setChannels ] = React.useState({});
-
+  const [channels, setChannels] = useState({});
   const channelId = sessionStorage.getItem("userId");
 
-	React.useEffect(() => {
-    try {
-      const fetchData = async () => {
-        const res = await axios.get("/statisticals/channels/follows", { params: { channelId: channelId } });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`/users/name/${channelId}`, {
+          params: { channelId: channelId },
+        });
         const { data } = res.data;
+        setChannels(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        // Xử lý lỗi ở đây, ví dụ: hiển thị một thông báo cho người dùng
+        // hoặc thực hiện một hành động phù hợp với ứng dụng của bạn.
+      }
+    };
 
-        setChannels(data[0]);
-      };
-
-      fetchData();
-    } catch (e) {
-      console.log(e);
-    }
+    fetchData();
   }, [channelId]);
 
-	return (
-		<>
-      <span className="badge badge-danger ml-1">{channels.follow}</span>
-		</>
-	)
+  return (
+    <>
+      {channels && channels.follow !== undefined && (
+        <span className="badge badge-danger ml-1">{channels.follow}</span>
+      )}
+    </>
+  );
 }

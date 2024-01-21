@@ -2,7 +2,7 @@ FROM node:18.19-alpine
 
 WORKDIR /usr/crawler
 
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 
 ENV NODE_SERVICE=crawler 
 

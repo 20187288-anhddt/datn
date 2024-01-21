@@ -33,17 +33,22 @@ export default function Trash() {
 
   // delete
   const handleDelete = async (id) => {
-    try {
-      const res = await axios.delete(`/news/${id}`);
-      const { code, message, data } = res.data;
-
-      const drafts = data.filter((v) => v.isDelete && v.createdBy._id === userId);
-
-      setNews(drafts);
-      dispatch(setMessage({ code, message }));
-      dispatch(closeMessage());
-    } catch (error) {
-      console.error("Error deleting news:", error);
+    // Hiển thị hộp thoại xác nhận
+    const isConfirmed = window.confirm("Bạn có chắc chắn muốn xóa bài viết này không?");
+  
+    if (isConfirmed) {
+      try {
+        const res = await axios.delete(`/news/${id}`);
+        const { code, message, data } = res.data;
+  
+        const drafts = data.filter((v) => v.isDelete && v.createdBy._id === userId);
+  
+        setNews(drafts);
+        dispatch(setMessage({ code, message }));
+        dispatch(closeMessage());
+      } catch (error) {
+        console.error("Error deleting news:", error);
+      }
     }
   };
 

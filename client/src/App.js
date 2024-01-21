@@ -11,6 +11,7 @@ import WithAuth from "./WithAuth";
 import ScrollToTop from "./ScrollToTop";
 import ScrollToTopButton from './components/ScrollToTopButton';
 import "./App.css";
+import ResetPassword from "./components/pages/account/resetPassword";
 
 // component lazy load
 const Home = React.lazy(() => import("./components/pages/home/Index"));
@@ -58,6 +59,7 @@ function App() {
 						<Route path="/login" component={Login} />
 						<Route path="/register" component={Register} />
 						<Route path="/forgot-password" component={ForgotPassword} />
+						<Route path="/reset-password/:token" exact component={ResetPassword} />
 						<Route path="/profile" component={Profile} />
 						<Route path="/category/*/:id" component={Category} />
 						<Route path="/channel/*/:id" component={Channel} />

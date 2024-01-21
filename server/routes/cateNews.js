@@ -197,10 +197,9 @@ router.post("/", async function (req, res, next) {
 
 router.post("/subCateNews", async function (req, res, next) {
   try {
-    const { subCategory, parentCategoryId, createdBy } = req.body;
+    const { name, parentCategoryId, createdBy } = req.body;
 
-    // Validation: Đảm bảo rằng 'subCategory', 'parentCategoryId', và 'createdBy' có giá trị
-    if (!subCategory || !parentCategoryId || !createdBy) {
+    if (!name || !createdBy) {
       return res.status(400).json({
         code: 400,
         message: "Dữ liệu đầu vào không hợp lệ",
@@ -210,21 +209,9 @@ router.post("/subCateNews", async function (req, res, next) {
       && logger.warn({status:400, message: "Dữ liệu đầu vào không hợp lệ", data : req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
     }
 
-    // Kiểm tra xem parentCategoryId có tồn tại trong CateNews không
-    const parentCategoryExists = await CateNewsModel.findById(parentCategoryId);
-    if (!parentCategoryExists) {
-      return res.status(404).json({
-        code: 404,
-        message: "Không tìm thấy chuyên mục cha",
-        err: null,
-        data: null,
-      })
-      && logger.warn({status:404, message: "Không tìm thấy chuyên mục cha", data : req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers});
-    }
-
     // Tạo một đối tượng SubCategory
     const subCategoryObject = {
-      name: subCategory,
+      name: name,
       parentCateNews: parentCategoryId,
       createdBy: createdBy,
     };

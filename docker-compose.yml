@@ -2,16 +2,16 @@ version: '3.3'
 services:
   # elasticsearch:
   #   build:
-  #     context: elasticsearch/
+  #     context: ./monitoring/elasticsearch/
   #     args:
   #       ELK_VERSION: $ELK_VERSION
   #   volumes:
   #     - type: bind
-  #       source: ./elasticsearch/config/elasticsearch.yml
+  #       source: ./monitoring/elasticsearch/config/elasticsearch.yml
   #       target: /usr/share/elasticsearch/config/elasticsearch.yml
   #       read_only: true
   #     - type: volume
-  #       source: datn-bknews
+  #       source: elasticsearch_datn-bknews
   #       target: /usr/share/elasticsearch/data
   #   ports:
   #     - "9200:9200"
@@ -24,23 +24,23 @@ services:
 
   # logstash:
   #   build:
-  #     context: logstash/
+  #     context: ./monitoring/logstash/
   #     args:
   #       ELK_VERSION: $ELK_VERSION
   #   volumes:
   #     - type: bind
-  #       source: ./logstash/config/logstash.yml
+  #       source: ./monitoring/logstash/config/logstash.yml
   #       target: /usr/share/logstash/config/logstash.yml
   #       read_only: true
   #     - type: bind
-  #       source: ./logstash/pipeline
+  #       source: ./monitoring/logstash/pipeline
   #       target: /usr/share/logstash/pipeline
   #       read_only: true
   #   ports:
-  #     - "5000:5000"
-  #     - "9600:9600"
-  #   expose: 
-  #     - "5044"
+  #   #   - "5000:5000"
+  #   #   - "9600:9600"
+  #   # expose: 
+  #     - "5044:5044"
   #   environment:
   #     LS_JAVA_OPTS: "-Xmx256m -Xms256m"
   #   networks:
@@ -50,7 +50,7 @@ services:
 
   # kibana:
   #   build:
-  #     context: kibana/
+  #     context: ./monitoring/kibana/
   #     args:
   #       ELK_VERSION: $ELK_VERSION
   #   environment:
@@ -60,7 +60,7 @@ services:
   #   #   ELASTICSEARCH_SERVICEACCOUNTTOKEN: AAEAAWVsYXN0aWMva2liYW5hL3Rva2VuMTpaM1YzQVpTMFFVNmhQU3UzczlmLUpn
   #   volumes:
   #     - type: bind
-  #       source: ./kibana/config/kibana.yml
+  #       source: ./monitoring/kibana/config/kibana.yml
   #       target: /usr/share/kibana/config/kibana.yml
   #       read_only: true
   #   ports:
@@ -71,10 +71,11 @@ services:
   #     - elasticsearch
 
   # filebeat:
-  #   build: ./filebeat
+  #   build: ./monitoring/filebeat
   #   entrypoint: "filebeat -e -strict.perms=false"
   #   volumes:
-  #     - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+  #     - ./monitoring/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+  #     - ./server/log:/var/log/server
   #   networks:
   #     - datn-bknews
   #   depends_on: 
@@ -100,6 +101,14 @@ services:
   #   networks:
   #     - project20231
 
+  nginx:
+    image: 1.23.3
+    ports: 
+      - 80:80
+    volumes:
+      - ./client/build:/usr/share/nginx/html
+      - ./monitoring/nginx/config/site.conf:/etc/nginx/conf.d/default.conf
+
   bknews-client:
     build : 
       context: ./client
@@ -107,28 +116,31 @@ services:
     volumes:
       - ./app:/usr/app
       - ./app/log:/var/log/app
-      - /usr/src/app-fe/node_modules/
     command: npm start
     ports:
-      - "3000:3000"
+      - "3003:3000"
     depends_on: 
       - bknews-server
     networks:
       - datn-bknews
+    labels:
+      org.label-schema.group: "monitoring"
 
   bknews-server:
     build : 
       context: ./server
       dockerfile: Dockerfile
     volumes:
-      - ./app:/usr/app
-      - ./app/log:/var/log/app
-      - /usr/src/app/node_modules/
+      - ./server:/usr/server
+      - ./server/log:/var/log/server
+      - /usr/src/server/node_modules/
     command: npm start
     ports:
-      - "3003:3003"
+      - "3456:3333"
     networks:
       - datn-bknews
+    labels:
+      org.label-schema.group: "monitoring"
 
   bknews-crawler:
     build : 
@@ -139,15 +151,170 @@ services:
       - ./app/log:/var/log/app
       - /usr/src/app/node_modules/
     command: npm start
-    ports:
-      - "3003:3003"
     depends_on: 
       - bknews-server
     networks:
       - datn-bknews
+    labels:
+      org.label-schema.group: "monitoring"
+
+  # prometheus:
+  #   image: prom/prometheus:v2.38.0
+  #   container_name: prometheus
+  #   volumes:
+  #     - ./monitoring/prometheus:/etc/prometheus
+  #     - prometheus_data:/prometheus
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #     - '--storage.tsdb.path=/prometheus'
+  #     - '--web.console.libraries=/etc/prometheus/console_libraries'
+  #     - '--web.console.templates=/etc/prometheus/consoles'
+  #     - '--storage.tsdb.retention.time=200h'
+  #     - '--web.enable-lifecycle'
+  #   restart: always
+  #   expose:
+  #     - 9090
+  #   networks:
+  #     -  datn-bknews
+  #   labels:
+  #     org.label-schema.group: "monitoring"
+
+  # alertmanager:
+  #   image: prom/alertmanager:v0.24.0
+  #   container_name: alertmanager
+  #   volumes:
+  #     - ./monitoring/alertmanager:/etc/alertmanager
+  #   command:
+  #     - '--config.file=/etc/alertmanager/config.yml'
+  #     - '--storage.path=/alertmanager'
+  #   restart: always
+  #   expose:
+  #     - 9093
+  #   networks:
+  #     - datn-bknews
+  #   labels:
+  #     org.label-schema.group: "monitoring"
+
+  # grafana:
+  #   image: grafana/grafana
+  #   container_name: grafana
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
+  #     - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+  #     - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+  #   env_file:
+  #     - config
+  #   restart: always
+  #   expose:
+  #     - 3000
+  #   networks:
+  #     - datn-bknews
+  #   labels:
+  #     org.label-schema.group: "monitoring"
+
+  # nodeexporter:
+  #   image: prom/node-exporter:v1.3.1
+  #   container_name: nodeexporter
+  #   volumes:
+  #     - /proc:/host/proc:ro
+  #     - /sys:/host/sys:ro
+  #     - /:/rootfs:ro
+  #   command:
+  #     - '--path.procfs=/host/proc'
+  #     - '--path.rootfs=/rootfs'
+  #     - '--path.sysfs=/host/sys'
+  #     - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+  #   restart: always
+  #   expose:
+  #     - 9100
+  #   networks:
+  #     - datn-bknews
+  #   labels:
+  #     org.label-schema.group: "monitoring"
+
+  # loki:
+  #   image: grafana/loki:2.6.0
+  #   container_name: loki
+  #   volumes:
+  #     - ./monitoring/loki/loki-config.yaml:/etc/loki/loki-config.yaml
+  #   command: -config.file=/etc/loki/loki-config.yaml
+  #   expose:
+  #     - 3100
+  #   restart: always
+  #   networks:
+  #     - datn-bknews
+
+  # promtail:
+  #   image: grafana/promtail:2.6.0
+  #   container_name: promtail
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - /var/log:/var/log:ro
+  #     - ./monitoring/loki/promtail-config.yaml:/etc/promtail/promtail-config.yaml
+  #   command: -config.file=/etc/promtail/promtail-config.yaml
+  #   restart: always
+  #   networks:
+  #     - datn-bknews
+
+  # pushgateway:
+  #   image: prom/pushgateway:v1.4.3
+  #   container_name: pushgateway
+  #   restart: always
+  #   expose:
+  #     - 9091
+  #   networks:
+  #     - datn-bknews
+  #   labels:
+  #     org.label-schema.group: "monitoring"
+
+  # caddy:
+  #   image: caddy:2.3.0
+  #   container_name: caddy
+  #   ports:
+  #     - "3000:3000"
+  #     - "9090:9090"
+  #     - "8080:8080"
+  #     - "9093:9093"
+  #     - "9091:9091"
+  #     - "3100:3100"
+  #   volumes:
+  #     - ./monitoring/caddy:/etc/caddy
+  #   environment:
+  #     - ADMIN_USER=${ADMIN_USER:-admin}
+  #     - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+  #     - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH:-JDJhJDE0JE91S1FrN0Z0VEsyWmhrQVpON1VzdHVLSDkyWHdsN0xNbEZYdnNIZm1pb2d1blg4Y09mL0ZP}
+  #   restart: always
+  #   networks:
+  #     - datn-bknews
+  #   labels:
+  #     org.label-schema.group: "monitoring"
+
+  # cadvisor:
+  #   image: gcr.io/cadvisor/cadvisor:v0.45.0
+  #   container_name: cadvisor
+  #   privileged: true
+  #   devices:
+  #     - /dev/kmsg:/dev/kmsg
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:ro
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker:/var/lib/docker:ro
+  #     #- /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
+  #   restart: always
+  #   expose:
+  #     - 8080
+  #   networks:
+  #     - datn-bknews
+  #   labels:
+  #     org.label-schema.group: "monitoring"
+
+
 
 networks:
   datn-bknews:
     driver: bridge
 volumes:
   elasticsearch_datn-bknews:
+  prometheus_data: {}
+  grafana_data: {}

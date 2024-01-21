@@ -5,8 +5,7 @@ const fileUpload = require("express-fileupload");
 const cateNewsRouter = require("./routes/cateNews");
 const newsRouter = require("./routes/news");
 const loginRouter = require("./routes/login");
-const newsEditRouter = require("./routes/newsEditor");
-const newsSensorRouter = require("./routes/newsSensor");
+const newsEditorRouter = require("./routes/newsEditor");
 const likeRouter = require("./routes/like");
 const rateRouter = require("./routes/rate");
 const usersRouter = require("./routes/users");
@@ -60,8 +59,7 @@ connectMongoDB();
 app.use("/users", usersRouter);
 app.use("/cateNews", cateNewsRouter);
 app.use("/news", newsRouter);
-app.use("/newsEdits", newsEditRouter);
-app.use("/newsSensors", newsSensorRouter);
+app.use("/newsEditors", newsEditorRouter);
 app.use("/login", loginRouter);
 app.use("/likes", likeRouter);
 app.use("/rates", rateRouter);
@@ -70,13 +68,13 @@ app.use("/followers", followersRouter);
 app.use("/comments", commentRouter);
 
 const port = process.env.PORT || 3333;
-if (process.env.NODE_ENV === "production") {
-  app.listen(port, () => console.log(`Server started at port: ${port}`));
-  // app.use(express.static("client/build"));
+// if (process.env.NODE_ENV === "production") {
+//   app.listen(port, () => console.log(`Server started at port: ${port}`));
+//   // app.use(express.static("client/build"));
 
-  // app.get("*", (req, res) => {
-  //   res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
-  // });
-}
+//   // app.get("*", (req, res) => {
+//   //   res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+//   // });
+// }
 
 app.listen(port, () => console.log(`Server started at port: ${port}`));

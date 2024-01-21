@@ -11,8 +11,14 @@ class BaseModel{
 
     init(){}
 
-    getHostNameUrl(){
-        return "http://" + this.hostName + "/"
+    getHostNameUrl() {
+        const baseUrl = "http://" + this.hostName;
+    
+        if (this.hostName === "znews.vn") {
+            return baseUrl + "/";
+        } else {
+            return baseUrl;
+        }
     }
 
     canParse(){

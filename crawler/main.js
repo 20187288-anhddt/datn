@@ -112,15 +112,13 @@ function jobRunFunc() {
     }
   });
 }
-
 jobRunFunc();
-
-var job = new CronJob(
-  "*/1 * * * *",
-  function () {
-    jobRunFunc();
-  },
-  null,
-  true
-);
-job.start();
+        var job = new CronJob(
+          "*/1 * * * *", // Chuỗi thời gian được sử dụng để định kỳ khi công việc sẽ được thực hiện.
+          function () {
+            jobRunFunc();// Hàm thực hiện thu thập data
+          },
+          null, // hàm callback được gọi khi công việc hoàn thành
+          true  // công việc bắt đầu ngay lập tức sau khi tạo không.
+        );
+        job.start(); // bắt đầu thực hiện công việc theo định kỳ.

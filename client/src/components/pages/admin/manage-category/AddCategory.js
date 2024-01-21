@@ -29,7 +29,7 @@ export default function AddCategory() {
 
   const onSubmit = async (data) => {
     const dataCate = {
-      subCategory: data.subCategory,
+      name: data.name,
       parentCategoryId: data.category,
       createdBy: createdBy,
     };
@@ -62,9 +62,9 @@ export default function AddCategory() {
             <label>Tên danh mục:</label>
               <input
                 type="text"
-                name="subCategory"
+                name="name"
                 style={{
-                  border: `${errors.subCategory ? "1px solid red" : ""}`,
+                  border: `${errors.name ? "1px solid red" : ""}`,
                 }}
                 className="form-control"
                 placeholder="Nhập tên danh mục ..."
@@ -84,7 +84,7 @@ export default function AddCategory() {
                 style={{
                   border: `${errors.category ? "1px solid red" : ""}`,
                 }}
-                ref={register({ required: true })}
+                //ref={register({ required: true })}
                 onChange={(e) => {
                   setSelectedCategory(e.target.value);
                 }}

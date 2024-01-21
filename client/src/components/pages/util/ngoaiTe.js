@@ -16,11 +16,13 @@ const GiaNgoaiTe = () => {
 
   return (
     <React.Fragment>
-      <iframe
+      {/* <iframe
         title="Tỷ giá ngoại tệ"
         style={{ border: "none", width: "95%", height: "480px" }}
         src="https://tygiado.com/nhung-ngoai-te/"
-      ></iframe>
+      ></iframe> */}
+
+<iframe class="contain-exchange-rate" style={{ border: "none", width: "95%", height: "480px" }} src="https://online.topi.vn/embed/ty-gia-usd-vnd"></iframe>
     </React.Fragment>
   );
 };

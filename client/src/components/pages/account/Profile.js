@@ -147,7 +147,7 @@ export default function Profile() {
         } catch (error) {
           console.error("Error updating password:", error);
           // Handle error and display appropriate message to the user
-          setUserPasswordErr("Có lỗi xảy ra khi cập nhật mật khẩu. Vui lòng thử lại.");
+          setUserPasswordErr("Mật khẩu hiện tại không đúng!");
         }
       }
     }

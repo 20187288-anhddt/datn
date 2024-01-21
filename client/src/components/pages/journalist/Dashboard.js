@@ -55,7 +55,7 @@ export default function Dashboard() {
     </div>
       <div className="row">
         <div style={{ alignItems: "center" }} className="col-xl-5 grid-margin font-weight-bold">Lượt follows: 
-          {/* <Follow /> */}
+          <Follow />
         </div>
         <div className="col-xl-7 grid-margin font-weight-bold"> 
           <div>Top 5 bài viết nổi bật:</div>

@@ -44,16 +44,33 @@ app.use(fileUpload());
 
 router.post("/signup", async function (req, res) {
   try {
+    if (req.body.email == undefined ||req.body.email == undefined||req.body.email == undefined) {
+      console.log(req.body.username);
+      return res.status(400).json({
+        code: 400,
+        message: `Vui lòng nhập đầy đủ thông tin`,
+        data: null,
+      });
+    }
+
     const userExist = await UserModel.findOne({ email: req.body.email });
 
     if (!userExist) {
       const hash = await bcrypt.hash(req.body.password, 8);
       const User = new UserModel();
-
+      password = req.body.password;
       User.username = req.body.username;
       User.password = hash;
       // User.image = file.name;
       User.email = req.body.email;
+      if (User.username == undefined ||password == undefined||User.email == undefined) {
+        console.log(req.body.username);
+        return res.status(400).json({
+          code: 400,
+          message: `Vui lòng nhập đầy đủ thông tin`,
+          data: null,
+        });
+      }
 
       const userCreate = await User.save();
 
@@ -64,10 +81,10 @@ router.post("/signup", async function (req, res) {
       }) && logger.info({status:200, message: "Đăng ký thành công tài khoản", data: userCreate, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
     } else {
       return res.json({
-        code: 200,
+        code: 491,
         message: "Người dùng đã tồn tại",
         data: null,
-      }) && logger.info({status:200, message: "Người dùng đã tồn tại", data: req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
+      }) && logger.info({status:491, message: "Người dùng đã tồn tại", data: req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
     }
   } catch (error) {
     return logger.error({ code: 400, message: error.message, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers, stack: error.stack  });
@@ -302,13 +319,6 @@ async (req, res) => {
       userExist.password
     );
     if (comparePassword) {
-      if (validInput.checkUserPassword(currentPassword)) {
-        return callRes(
-          res,
-          responseCode.PARAMETER_VALUE_IS_INVALID,
-          "password"
-        );
-      }
       const hashPassword = await bcrypt.hash(newPassword, 8);
       const user = {
         password: hashPassword,

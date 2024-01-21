@@ -6,7 +6,7 @@ ARG PORT=3333
 
 ENV PORT ${PORT}
 
-ENV NODE_ENV=production
+# ENV NODE_ENV=development
 
 ENV NODE_SERVICE=server 
 

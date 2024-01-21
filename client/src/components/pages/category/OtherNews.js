@@ -60,7 +60,6 @@ export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightN
                     to={`/${hanldeUrlPretty(item.title)}/${item._id}`}
                     key={index}
                     className="other-new p-3 bg-white rounded text-decoration-none"
-                    target="_blank"
                     rel="noopener noreferrer"
                   >
                     <div className="other-new__image border border-secondary">
@@ -96,7 +95,6 @@ export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightN
                 to={`/${hanldeUrlPretty(item.title)}/${item._id}`}
                 key={index}
                 className="additonal-new p-3 bg-white rounded text-decoration-none custom-col-lg-5 m-2 text-color"
-                target="_blank"
                 rel="noopener noreferrer"
               >
                 <div className="other-new__image border border-secondary">

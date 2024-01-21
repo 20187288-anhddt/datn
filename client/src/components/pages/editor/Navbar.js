@@ -11,9 +11,17 @@ export default function Navbar() {
             <i className="mdi mdi-home menu-icon" />
           </Link>
         </li>
+        
+        <li className="nav-item">
+          <Link to="/admin/newsmng" className="nav-link">
+            <span className="menu-title">Quản lý bài viết</span>
+            <i className="mdi mdi-view-list menu-icon" />
+          </Link>
+        </li>
+
         <li className="nav-item">
           <Link to="/admin/news" className="nav-link">
-            <span className="menu-title">News</span>
+            <span className="menu-title">Phê duyệt bài viết</span>
             <i className="mdi mdi-view-list menu-icon" />
           </Link>
         </li>

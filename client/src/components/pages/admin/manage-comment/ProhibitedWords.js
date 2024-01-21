@@ -68,7 +68,7 @@ export default function Comment() {
 									name="word"
 									style={{ border: `${errors.word ? "1px solid red" : ""}` }}
 									className="form-control"
-									placeholder="Enter a new word..."
+									placeholder="Nhập từ cấm bình luận..."
 									ref={register({ required: true })}
 								/>
 								{errors.word && (

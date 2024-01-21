@@ -56,7 +56,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="row" style={{ padding: "0px 30px 30px 30px" }}>
+      {/* <div className="row" style={{ padding: "0px 30px 30px 30px" }}>
         <div style={{ alignItems: "center", marginBottom:"20px" }} className="col-xl-12 grid-margin stretch-card font-weight-bold">
           <div style={{display:"inline-block", minWidth:"200px", marginLeft:"20px"}}>
             Số lượng bài báo theo ngày: 
@@ -72,7 +72,7 @@ export default function Dashboard() {
         <div className="col-xl-12 grid-margin stretch-card" >
           <NewsByMonthStatisticals month={month} />
         </div>
-      </div>
+      </div> */}
 
 
 

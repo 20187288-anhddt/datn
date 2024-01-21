@@ -16,19 +16,19 @@ export default function Detail({ match, location }) {
   React.useEffect(() => {
     const fetchData = async () => {
       const res = await axios.get(`/news/details/${id}`);
-
+  
+      // Set datas
       setDatas(res.data.data[0]);
+  
+      // Check if datas.content is null or an empty string
+      if (res.data.data[0].content === null || res.data.data[0].content === "" || res.data.data[0].content === "<p>Mời quý vị và các bạn đón xem video dưới đây:</p><p><br></p>") {
+        // Open originalLink in a new tab
+        window.open(res.data.data[0].originalLink, "_blank");
+      }
     };
-
+  
     fetchData();
   }, [id]);
-  React.useEffect(() => {
-    // Check if datas.content is null or an empty string
-    if (datas.content === null || datas.content === "") {
-      // Open originalLink in a new tab
-      window.open(datas.originalLink, "_blank");
-    }
-  }, [datas]);
   return !datas
     ? <NotExistNews/> : (
         <React.Fragment>
