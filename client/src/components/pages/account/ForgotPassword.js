@@ -39,7 +39,11 @@ const ForgotPassword = () => {
 	  }
 	} catch (error) {
 	  console.error("Có lỗi khi yêu cầu quên mật khẩu:", error);
+    if (error.response && error.response.status === 404) {
+      setErrorMessage("Email không đúng hoặc không tồn tại trong hệ thống! Vui lòng kiểm tra lại");
+    } else {
     setErrorMessage("Gửi yêu cầu đặt lại mật khẩu thành công, vui lòng kiểm tra email");
+    }
 	}
   };
   

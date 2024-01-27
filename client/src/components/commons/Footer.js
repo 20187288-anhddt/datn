@@ -78,9 +78,9 @@ export default function Footer() {
     speed: 5000,
     slidesToShow: 10,
     // slidesToScroll: auto,
-    autoplay: true, // Enable autoplay
-    autoplaySpeed: 0, // Set to 0 for continuous autoplay
-    cssEase: 'linear', // Ensures continuous scrolling
+    autoplay: true,
+    autoplaySpeed: 0, 
+    cssEase: 'linear',
   };
 
 

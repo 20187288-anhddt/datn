@@ -49,7 +49,7 @@ export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightN
             <h3 className="mb-3 text-red font-weight pt-3">
         <center>Tin tức tổng hợp về {categoryName}</center>
       </h3>
-      {tagsOtherNews && (
+      {/* {tagsOtherNews && (
         tagsOtherNews.map((tag, index) => (
           <div className="" key={index}>
             <h3 className="mb-3 mt-3 text-red font-weight">{tag}</h3>
@@ -83,7 +83,7 @@ export default function OtherNews({ tags, newsByTag, newsHighlightId, highlightN
             )}
           </div>
         ))
-      )}
+      )} */}
 
 
 

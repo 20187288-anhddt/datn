@@ -13,6 +13,13 @@ import { setMessage } from "../../../actions/message.action";
 import { closeMessage } from "../closeMessage";
 import Message from "../Message";
 
+const checkUserIsFollowing = (userExist, id, data) => {
+  if (userExist && data) {
+    const checkFollowing = data.find(v => v.followBy === userExist && v.channel === id);
+    return checkFollowing;
+  }
+};
+
 const Channel = ({ match }) => {
   const [following, setFollowing] = useState({});
   const [highlightNew, setHighlightNew] = useState(null);
@@ -43,12 +50,7 @@ const Channel = ({ match }) => {
   
   }, [id, userExist]);
 
-  const checkUserIsFollowing = (userExist, id, data) => {
-    if (userExist && data) {
-      const checkFollowing = data.find(v => v.followBy === userExist && v.channel === id);
-      return checkFollowing;
-    }
-  };
+
   useEffect(() => {
   const fetchDataNews = async () => {
 	const res = await axios.get(`/news/users/${id}`);
@@ -125,8 +127,8 @@ fetchDataNews();
   return (
     <>
       <Helmet>
-        <title>{channel ? `${channel.username} - BNews kênh tin tức hàng đầu Việt Nam` : "Loading..."}</title>
-        <meta name="description" content="BNews kênh tin tức hàng đầu Việt Nam, thời dự, bóng đá, tin trong ngày, giải trí, bất động sản,..." />
+        <title>{channel ? `${channel.username} - BKnews kênh tin tức hàng đầu Việt Nam` : "Loading..."}</title>
+        <meta name="description" content="BKnews kênh tin tức hàng đầu Việt Nam, thời dự, bóng đá, tin trong ngày, giải trí, bất động sản,..." />
       </Helmet>
       <React.Fragment>
         <Message />

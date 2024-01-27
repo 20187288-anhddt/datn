@@ -34,12 +34,12 @@ export default function Home() {
     <>
       <Helmet>
         <title>
-          BNews kênh tin tức thời dự, bóng đá, tin trong ngày, giải trí, bất
+          BKnews kênh tin tức thời dự, bóng đá, tin trong ngày, giải trí, bất
           động sản,...
         </title>
         <meta
           name="description"
-          content="BNews kênh tin tức hàng đầu Việt Nam, thời dự, bóng đá, tin trong ngày, giải trí, bất động sản,..."
+          content="BKnews kênh tin tức hàng đầu Việt Nam, thời dự, bóng đá, tin trong ngày, giải trí, bất động sản,..."
         />
       </Helmet>
       <div className="container">

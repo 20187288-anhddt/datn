@@ -22,7 +22,8 @@ export default function AddNews() {
   const { register, handleSubmit, errors } = useForm();
   const appState = useSelector((state) => state);
   const dispatch = useDispatch();
-
+  const [selectedFile, setSelectedFile] = useState(null);
+  
   useEffect(() => {
     dispatch(setMessage({ message: "" }));
 
@@ -86,11 +87,24 @@ export default function AddNews() {
     setContent(content);
   };
 
-  const hanldeChangeUpload = (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
-  
-    setFile(e.target.files[0]); // Use e.target.files[0] to get the first selected file
+  const hanldeChangeUpload = (event) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        setSelectedFile({
+          name: file.name,
+          dataURL: reader.result,
+        });
+      };
+
+      reader.readAsDataURL(file);
+    }
   };
+
+
 
   const onSunmit = async (data) => {
     try {
@@ -257,29 +271,37 @@ export default function AddNews() {
               </button>
             </div>
             <div className="form-group">
-              <label>Ảnh đại diện:</label>
-              <div className="custom-file mb-3">
-                <input
-                  type="file"
-                  className="custom-file-input"
-                  style={{ border: `${errors.email ? "1px solid red" : ""}` }}
-                  id="customFile"
-                  name="filename"
-                  onChange={hanldeChangeUpload}
-                  ref={register({ required: true })}
-                />
-                <label
-                  style={{ height: "calc(1.5em + 0.75rem + 0px)" }}
-                  className="custom-file-label bd-none bdr-none"
-                  htmlFor="customFile"
-                >
-                  Choose file
-                </label>
-              </div>
-              {errors.filename && (
-                <small className="text-danger">Bạn phải điền đầy đủ thông tin...</small>
-              )}
-            </div>
+      <label>Ảnh đại diện:</label>
+      <div className="custom-file mb-3">
+        <input
+          type="file"
+          className="custom-file-input"
+          style={{ border: `${errors.email ? "1px solid red" : ""}` }}
+          id="customFile"
+          name="filename"
+          onChange={hanldeChangeUpload}
+        />
+        <label
+          style={{ height: "calc(1.5em + 0.75rem + 0px)" }}
+          className="custom-file-label bd-none bdr-none"
+          htmlFor="customFile"
+        >
+           {selectedFile ? selectedFile.name : "Choose file"}
+        </label>
+      </div>
+      {selectedFile && (
+        <div>
+          <img
+            src={selectedFile.dataURL}
+            alt="Uploaded"
+            style={{ maxWidth: '360px', maxHeight: '360px' }}
+          />
+        </div>
+      )}
+      {errors.filename && (
+        <small className="text-danger">Bạn phải điền đầy đủ thông tin...</small>
+      )}
+    </div>
             <div className="form-group">
               <label>Trạng thái:</label>
               <select

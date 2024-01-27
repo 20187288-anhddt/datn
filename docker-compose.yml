@@ -102,9 +102,13 @@ services:
   #     - project20231
 
   nginx:
-    image: 1.23.3
+    build: ./monitoring/nginx
     ports: 
       - 80:80
+    networks:
+      - datn-bknews
+    depends_on: 
+      - bknews-client
     volumes:
       - ./client/build:/usr/share/nginx/html
       - ./monitoring/nginx/config/site.conf:/etc/nginx/conf.d/default.conf
@@ -118,7 +122,7 @@ services:
       - ./app/log:/var/log/app
     command: npm start
     ports:
-      - "3003:3000"
+      - "3000:3000"
     depends_on: 
       - bknews-server
     networks:
@@ -136,7 +140,7 @@ services:
       - /usr/src/server/node_modules/
     command: npm start
     ports:
-      - "3456:3333"
+      - "3333:3333"
     networks:
       - datn-bknews
     labels:

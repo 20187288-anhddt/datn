@@ -54,13 +54,19 @@ async function putCrawledArticle(article) {
 }
 
 function getCategory(categoryRaw) {
+  // Lặp qua mảng allCategories
   for (let cate of allCategories) {
     try {
+      // So sánh tên danh mục sau khi được chuyển đổi thành dạng slug
       if (Utils.stringToSlug(categoryRaw) == Utils.stringToSlug(cate.name)) {
+        // Nếu tìm thấy, trả về đối tượng danh mục
         return cate;
       }
-    } catch (err) {}
+    } catch (err) {
+      // Bỏ qua lỗi nếu có và tiếp tục với các phần tử tiếp theo
+    }
   }
+  // Nếu không tìm thấy, trả về undefined
   return undefined;
 }
 
@@ -70,17 +76,19 @@ class ArticalCrawler {
     let self = this;
     this.crawler = new Crawler({
       maxConnections: 10,
-      // This will be called for each crawled page
+      // Hàm gọi lại này sẽ được gọi cho mỗi trang đã crawl
       callback: function (error, res, done) {
         if (error) {
           console.log(error);
         } else {
           for (let modelClass of crawlerModelClasses) {
+            // Tạo một thể hiện của lớp mô hình hiện tại với phản hồi trang đã crawl
             let model = new modelClass(res);
             if (model.canParse()) {
+              // Phân tích mô hình và thêm kết quả vào mảng kết quả
               Array.prototype.push.apply(self.result, model.parse(model));
-              for (let artical of self.result) {
-                putCrawledArticle(artical);
+              for (let article of self.result) {
+                putCrawledArticle(article);
               }
             }
           }

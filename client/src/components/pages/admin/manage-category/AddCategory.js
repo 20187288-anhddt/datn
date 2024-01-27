@@ -10,7 +10,7 @@ export default function AddCategory() {
   const appState = useSelector((state) => state);
   const dispatch = useDispatch();
   const createdBy = appState.users.data ? appState.users.data._id : null;
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
@@ -30,9 +30,12 @@ export default function AddCategory() {
   const onSubmit = async (data) => {
     const dataCate = {
       name: data.name,
-      parentCategoryId: data.category,
+      parentCategoryId: selectedCategory,
       createdBy: createdBy,
     };
+
+    console.log("Data Cate:", dataCate);
+
 
     try {
       const res = await axios.post("/cateNews/subCateNews", dataCate);
@@ -86,6 +89,7 @@ export default function AddCategory() {
                 }}
                 //ref={register({ required: true })}
                 onChange={(e) => {
+                  console.log("Selected Category:", e.target.value);
                   setSelectedCategory(e.target.value);
                 }}
               >
@@ -93,9 +97,9 @@ export default function AddCategory() {
                   -- Chọn thể loại --
                 </option>
                 {categories.map((category) => (
-                  <option key={category._id} value={category._id}>
-                    {category.name}
-                  </option>
+                  <option value={category._id} key={category._id}>
+  {category.name}
+</option>
                 ))}
               </select>
             </div>

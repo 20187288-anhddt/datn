@@ -18,9 +18,11 @@ export default function AddNew() {
     const [subCategories, setSubCategories] = useState([]);
     const [categories, setCategories] = useState([]);
     const [draft, setDraft] = React.useState(false);
+    const [loading, setLoading] = React.useState(false);
     const { register, handleSubmit, errors } = useForm();
     const appState = useSelector((state) => state);
     const dispatch = useDispatch();
+    const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
     dispatch(setMessage({ message: "" }));
@@ -85,8 +87,21 @@ export default function AddNew() {
     setContent(content);
   };
 
-  const hanldeChangeUpload = e => {
-    setFile(e.target.files[0]);
+  const hanldeChangeUpload = (event) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        setSelectedFile({
+          name: file.name,
+          dataURL: reader.result,
+        });
+      };
+
+      reader.readAsDataURL(file);
+    }
   };
 
   const hanldeChangeDraft = e => {
@@ -133,6 +148,7 @@ export default function AddNew() {
 
   const onSunmit = async (data) => {
     try {
+      setLoading(true);
       const formData = new FormData();
 
       formData.append("title", data.title);
@@ -246,7 +262,6 @@ export default function AddNew() {
                 name="subCategory"
                 className="form-control"
                 style={{ border: `${errors.subCategory ? "1px solid red" : ""}` }}
-                ref={register({ required: true })}
               >
                 {subCategories.map((subCategory, index) => (
                   <option key={index} value={subCategory._id}>
@@ -302,29 +317,37 @@ export default function AddNew() {
               </button>
             </div>
             <div className="form-group">
-              <label>Ảnh đại diện:</label>
-              <div className="custom-file mb-3">
-                <input
-                  type="file"
-                  className="custom-file-input"
-                  style={{ border: `${errors.email ? "1px solid red" : ""}` }}
-                  id="customFile"
-                  name="filename"
-                  onChange={hanldeChangeUpload}
-                  ref={register({ required: true })}
-                />
-                <label
-                  style={{ height: "calc(1.5em + 0.75rem + 0px)" }}
-                  className="custom-file-label bd-none bdr-none"
-                  htmlFor="customFile"
-                >
-                  Choose file
-                </label>
-              </div>
-              {errors.filename && (
-                <small className="text-danger">Bạn phải điền đầy đủ thông tin...</small>
-              )}
-            </div>
+            <label>Ảnh đại diện:</label>
+      <div className="custom-file mb-3">
+        <input
+          type="file"
+          className="custom-file-input"
+          style={{ border: `${errors.email ? "1px solid red" : ""}` }}
+          id="customFile"
+          name="filename"
+          onChange={hanldeChangeUpload}
+        />
+        <label
+          style={{ height: "calc(1.5em + 0.75rem + 0px)" }}
+          className="custom-file-label bd-none bdr-none"
+          htmlFor="customFile"
+        >
+           {selectedFile ? selectedFile.name : "Choose file"}
+        </label>
+      </div>
+      {selectedFile && (
+        <div>
+          <img
+            src={selectedFile.dataURL}
+            alt="Uploaded"
+            style={{ maxWidth: '360px', maxHeight: '360px' }}
+          />
+        </div>
+      )}
+      {errors.filename && (
+        <small className="text-danger">Bạn phải điền đầy đủ thông tin...</small>
+      )}
+    </div>
 
             <div className="form-group">
               <label>Đường dẫn bài viết gốc (Nếu có):</label>
@@ -355,8 +378,17 @@ export default function AddNew() {
             ) : (
               <button type="submit" className="btn btn-danger">
                 Gửi yêu cầu phê duyệt
-              </button>
+              </button>      
+            )
+            }
+            {loading && (
+              <div className="text-center">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="sr-only">Loading...</span>
+                </div>
+              </div>
             )}
+
           </form>
         </div>
       </div>

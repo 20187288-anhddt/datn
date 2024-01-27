@@ -119,12 +119,12 @@ router.post("/", async function (req, res, next) {
 
     // Kiểm tra tài khoản có bị khóa không
     if (user.isDelete === true) {
-      return res.status(401).json({
-        code: 401,
+      return res.status(402).json({
+        code: 402,
         message:
           "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên!",
         data: null,
-      })&& logger.warn({status:401, message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên!", data: req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
+      })&& logger.warn({status:402, message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên!", data: req.body, url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
     }
 
     // So sánh mật khẩu

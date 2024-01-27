@@ -28,32 +28,38 @@ export default function Login({ history }) {
 
       try {
          const res = await axios.post("/login", data);
-
+       
          if (res.data.code === 200) {
-            const { token } = res.data;
-            localStorage.setItem("auth-token", token);
-
-            const { _id } = res.data.data;
-            const userId = _id;
-            sessionStorage.setItem("userId", userId);
-            localStorage.setItem("userId", userId);
-
-            dispatch(addUser(res.data.data));
-
-            dispatch(setMessage({ code: 200, message: "Đăng nhập thành công" }));
-            dispatch(closeMessage());
-
-            history.push("/");
+           const { token } = res.data;
+           localStorage.setItem("auth-token", token);
+       
+           const { _id } = res.data.data;
+           const userId = _id;
+           sessionStorage.setItem("userId", userId);
+           localStorage.setItem("userId", userId);
+       
+           dispatch(addUser(res.data.data));
+       
+           dispatch(setMessage({ code: 200, message: "Đăng nhập thành công" }));
+           dispatch(closeMessage());
+       
+           history.push("/");
          } else {
-            setErrorMessage(res.data.message);
-            dispatch(setMessage({ code: res.data.code, message: res.data.message }));
-            dispatch(closeMessage());
+           setErrorMessage(res.data.message);
+           dispatch(setMessage({ code: res.data.code, message: res.data.message }));
+           dispatch(closeMessage());
          }
-      } catch (error) {
+       } catch (error) {
          console.error("Có lỗi khi đăng nhập:", error);
-         setErrorMessage("Email hoặc mật khẩu không chính xác");
+       
+         // Kiểm tra nếu mã lỗi là 401 và báo "Tài khoản bị khóa"
+         if (error.response && error.response.status === 402) {
+           setErrorMessage("Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên!");
+         } else {
+           setErrorMessage("Email hoặc mật khẩu không chính xác");
+         }
+       }
       }
-   };
 
    return (
       <>

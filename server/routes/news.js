@@ -16,11 +16,11 @@ const moment = require("moment");
 const dotenv = require("dotenv");
 const OpenAI = require( "openai");
 const logger = require("../utils/logger")
+const _ = require('lodash');
 
 const openai = new OpenAI({
-  apiKey: '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',
-}
-);
+  apiKey: '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',
+});
 
 /* GET users listing. */
 
@@ -83,11 +83,11 @@ router.get("/trash", async function (req, res, next) {
 router.get("/newsEntertainments", async function (req, res, next) {
   try {
     const newsId = req.query.newsId;
-    const News = await NewsModel.find({ status: "published", cateNews: newsId })
-      .limit(9)
-      .sort({ view: -1, dateCreate: -1 })
+    let News = await NewsModel.find({ status: "published", cateNews: newsId })
+      .limit(30)
+      .sort({ dateCreate: -1 })
       .populate("createdBy");
-
+      News = _.sampleSize(News, 9);
     return res.json({
       code: 200,
       error: null,
@@ -103,6 +103,7 @@ router.get("/newsEntertainments", async function (req, res, next) {
 });
 
 // get news Reel
+
 router.get("/newsReels", async function (req, res, next) {
   try {
     const newsId = req.query.newsId;
@@ -116,16 +117,19 @@ router.get("/newsReels", async function (req, res, next) {
     }
 
     // Tiếp tục xử lý với newsId hợp lệ
-    const News = await NewsModel.find({ status: "published", cateNews: newsId })
-      .limit(8)
-      .sort({ view: -1, dateCreate: -1 })
+    let News = await NewsModel.find({ status: "published", cateNews: newsId })
+      .limit(20)
+      .sort({ dateCreate: -1 })
       .populate("createdBy");
+
+    // Randomly select 8 values from the first 20 values
+    News = _.sampleSize(News, 8);
 
     return res.json({
       code: 200,
       error: null,
       data: News,
-    }) && logger.info({status:200, message: "Lấy danh sách tin tức thời sự thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });;
+    }) && logger.info({status:200, message: "Lấy danh sách tin tức thời sự thành công", url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers });
   } catch (error) {
     return res.status(500).json({
       code: 500,
@@ -277,7 +281,7 @@ router.get("/featuredNews", async function (req, res, next) {
 
     // Tính thời điểm 24 giờ trước đó
     const twentyFourHoursAgo = new Date(now);
-    twentyFourHoursAgo.setHours(now.getHours() - 72);
+    twentyFourHoursAgo.setHours(now.getHours() - 48);
 
     // Truy vấn để lấy các bài viết nổi bật trong vòng 24 giờ
     const featuredNews = await NewsModel.find({
@@ -347,9 +351,9 @@ router.get("/other", async function (req, res, next) {
   } catch (error) {
     return res.json({
       code: 400,
-      error: error.messege,
+      error: error.message,
       data: null,
-    }) && logger.warn({status:400, message: error.messege, error,url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers , stack: error.stack});
+    }) && logger.warn({status:400, message: error.message, error,url: req.originalUrl, method: req.method, sessionID: req.sessionID, headers: req.headers , stack: error.stack});
   }
 });
 
@@ -680,7 +684,6 @@ router.get("/details/:_idNews", async function (req, res, next) {
       _id: idNews,
       isDelete: false,
     }).populate("createdBy");
-    console.log(News[0].originalLink);
     if (News.length === 0) {
       return res.json({
         code: 200,
@@ -785,6 +788,10 @@ router.get("/details/:_idNews", async function (req, res, next) {
           $img.attr('src', $img.attr('data-src'));
 
           // Loại bỏ thuộc tính data-src
+          if (!$img.attr('data-image-id')) {
+            // Xóa phần tử nếu không có thuộc tính data-image-id
+            $img.remove();
+          }
 
         });
         // Sử dụng cheerio để load mã HTML
@@ -1149,6 +1156,16 @@ try {
   const body = req.body;
   const file = req.files.file;
 
+  if (!body.sapo && body.content) {
+    // Tóm tắt nội dung với ChatGPT
+    const { summarizedContent, message } = await tomtatWithChatGPT(body.content);
+
+    body.sapo = summarizedContent;
+
+    // Gán giá trị message vào trường sapo_message nếu cần
+    body.sapo_message = message;
+  }
+  
   if (file) {
     file.mv(`${__dirname}/../../client/public/uploads/news/${file.name}`);
   }
@@ -1433,5 +1450,119 @@ router.get("/", async function (req, res, next) {
     });
   }
 });
+
+
+
+
+
+
+
+// Import thư viện BitapSearch
+function bitapSearch(pattern, data, keys) {
+  const m = pattern.length;
+  const n = data.length;
+
+  let R = ~1;
+  if (m === 0) {
+      return [];
+  } else if (m > 31) {
+      console.error("Mẫu quá dài, không thể xử lý.");
+      return [];
+  }
+  let patternMask = 1 << (m - 1);
+  let matches = [];
+
+  for (let i = 0; i < n; i++) {
+      R |= 1;
+
+      if ((R & patternMask) !== 0) {
+          const bitapResult = bitapMatch(i, pattern, data, keys);
+
+          if (bitapResult !== -1) {
+              matches.push(JSON.parse(data[bitapResult])); // Parse JSON string to object and add to matches
+          }
+      }
+
+      R <<= 1;
+  }
+
+  return matches;
+}
+
+function bitapMatch(start, pattern, data, keys) {
+  const m = pattern.length;
+  const n = keys.length;
+
+  let j = 0;
+
+  while (j < m) {
+      const key = keys[j];
+
+      const value = 'content';
+
+      if (value !== undefined) {
+          console.log(`Checking ${key}: ${value.toLowerCase()} against ${pattern[j].toLowerCase()}`);
+          if (value.toLowerCase().includes(pattern[j].toLowerCase())) {
+              j++;
+          } else {
+              break;
+          }
+      } else {
+          //  console.log(`${key} is undefined at position ${start}`);
+          break;
+      }
+  }
+
+  if (j === m) {
+      return start;  // Trả về vị trí của kết quả
+  }
+
+  return -1;  // Trả về -1 nếu không có kết quả
+}
+
+router.post("/a", async function (req, res, next) {
+  try {
+    const textSearch = req.query.textSearch;
+
+    if (!textSearch || textSearch.trim() === "") {
+        return res.status(400).json({
+            code: 400,
+            error: "Vui lòng nhập 'textSearch' parameter",
+            data: null,
+        });
+    }
+
+    const newsData = await NewsModel.find({
+        isDelete: false,
+        status: "published",
+    })
+        .sort({ view: -1, dateCreate: -1 });
+
+    // Chuyển đổi dữ liệu tin tức sang định dạng mà BitapSearch yêu cầu
+    const jsonData = newsData.map(item => JSON.stringify(item));
+
+    // Loại bỏ ký tự đặc biệt từ textSearch
+    const sanitizedTextSearch = textSearch.replace(/[^\w\s]/g, '');
+
+    // Chọn các trường bạn muốn tìm kiếm (ví dụ: title, content, sapo)
+    const keysToSearch = ['title', 'content', 'sapo'];
+
+    // Thực hiện tìm kiếm với hàm bitapSearch thay vì Fuse.js
+    const searchResult = bitapSearch(sanitizedTextSearch, jsonData, keysToSearch);
+
+    return res.json({
+        code: 200,
+        error: null,
+        data: searchResult,
+    });
+} catch (error) {
+    return res.status(500).json({
+        code: 500,
+        error: error.message,
+        data: null,
+    });
+}
+});
+
 
 module.exports = router;

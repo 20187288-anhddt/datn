@@ -21,7 +21,7 @@ export default function NavAdmin(props) {
   };
 
   return (
-    <nav className="navbar fixed-top navbar-expand-xl navbar-dark bg-dark shadow-sm py-0 px-3">
+    <nav style={{ zIndex: 1041 }} className="navbar fixed-top navbar-expand-xl navbar-dark bg-dark shadow-sm py-0 px-3">
       <div className="container">
         <Link to="/" className="navbar-brand">
           <img width="100%" src="/Logo-news.png" alt="Logo news" />

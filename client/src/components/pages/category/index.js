@@ -51,8 +51,8 @@ export default function Category({ match }) {
 	return (
 		<>
 			<Helmet>
-				<title>{` ${categoryName ? categoryName + ' - BNews kênh tin tức hàng đầu Việt Nam' : "Loading..."} `}</title>
-				<meta name="description" content="BNews kênh tin tức hàng đầu Việt Nam, thời dự, bóng đá, tin trong ngày, giải trí, bất động sản,..." />
+				<title>{` ${categoryName ? categoryName + ' - BKnews kênh tin tức hàng đầu Việt Nam' : "Loading..."} `}</title>
+				<meta name="description" content="BKnews kênh tin tức hàng đầu Việt Nam, thời dự, bóng đá, tin trong ngày, giải trí, bất động sản,..." />
 			</Helmet>
 			<React.Fragment>
 				<div className="container">

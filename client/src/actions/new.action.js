@@ -25,6 +25,11 @@ const setSearchNews = (data) => ({
   payload: data
 });
 
+const setNewsChannel = (data) => ({
+  type: "GET_NEWS_CHANNEL",
+  payload: data
+});
+
 export const getLatestNewsByCategory = (categoryId, number) => {
   return async (dispatch) => {
     try {
@@ -34,6 +39,22 @@ export const getLatestNewsByCategory = (categoryId, number) => {
       const data = res.data.data;
 
       dispatch(setLatestNewsByCategory(data));
+      dispatch(setLoading(false));
+    } catch (error) {
+      dispatch(setLoading(false));
+      dispatch(setError(`Lỗi khi lấy tin tức: ${error.message}`));
+    }
+  };
+};
+
+export const getNewsChannel = (userID, number) => {
+  return async dispatch => {
+    try {
+      dispatch(setLoading(true));
+    const res = await axios.get(`/news/users/${userID}`, { params: { number: number } });
+    const data = res.data.data;
+
+    dispatch(setNewsChannel(data));
       dispatch(setLoading(false));
     } catch (error) {
       dispatch(setLoading(false));
@@ -68,12 +89,13 @@ export const getNews = () => {
 
 export const getNewsOther = (number) => {
   return async dispatch => {
-    const res = await axios.get("/news/other", { params: { number: number } });
+    const res = await axios.get('/news/other/', { params: { number: number } });
     const data = res.data.data;
 
     dispatch(setNewsOther(data));
   };
 };
+
 
 
 export const getLatestNews = () => {
